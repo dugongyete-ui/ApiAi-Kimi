@@ -32,7 +32,6 @@ export default {
 
             const token = authHeader.replace(/^Bearer\s+/i, '').trim();
 
-            // 检测 token 类型
             const tokenType = detectTokenType(token);
 
             let { model, conversation_id: convId, messages, stream, use_search } = request.body;
@@ -40,26 +39,21 @@ export default {
             if (use_search)
                 model = 'kimi-search';
 
-            // 根据 token 类型选择 API
             if (tokenType === 'jwt') {
-                // 使用 Connect RPC API (V2)
-                logger.info(`Using Connect RPC API (JWT token detected)`);
+                logger.info(`Using Connect RPC API (JWT token detected), convId: ${convId || 'new'}`);
 
                 if (stream) {
-                    const streamResponse = await createCompletionStreamV2(model, messages, token);
+                    const streamResponse = await createCompletionStreamV2(model, messages, token, convId);
                     return new Response(streamResponse, {
                         type: "text/event-stream"
                     });
                 } else {
-                    return await createCompletionV2(model, messages, token);
+                    return await createCompletionV2(model, messages, token, convId);
                 }
             } else {
-                // 使用传统 REST API (V1)
                 logger.info(`Using traditional REST API (refresh token detected)`);
 
-                // refresh_token切分
                 const tokens = chat.tokenSplit(authHeader);
-                // 随机挑选一个refresh_token
                 const selectedToken = _.sample(tokens);
 
                 if (stream) {
