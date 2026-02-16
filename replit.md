@@ -1,15 +1,15 @@
-# SANSEKAI API Documentation - Project Summary
+# API Kimi Gratis - Project Summary
 
 ## Overview
 
-**SANSEKAI API** (Kimi Free API Fix) adalah server API proxy yang mengubah layanan Kimi AI (dari Moonshot AI) menjadi API yang kompatibel dengan format OpenAI, Google Gemini, dan Anthropic Claude. Server ini ditulis dalam TypeScript menggunakan framework Koa.js.
+**API Kimi Gratis** (Kimi Free API Fix) adalah server API proxy yang mengubah layanan Kimi AI (dari Moonshot AI) menjadi API yang kompatibel dengan format OpenAI, Google Gemini, dan Anthropic Claude. Server ini ditulis dalam TypeScript menggunakan framework Koa.js.
 
 Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi untuk berjalan sepenuhnya di Replit pada port 5000.
 
 ### Status: Berjalan (Running)
 - Server aktif di port 5000
 - Semua endpoint sudah ditest dan berfungsi
-- Swagger-style API Documentation UI tersedia di halaman utama (REST API only)
+- API Documentation UI (Swagger-style) tersedia di halaman utama (REST API only)
 
 ## Project Architecture
 
@@ -93,7 +93,7 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 ### Endpoint Tanpa Autentikasi
 | Endpoint | Method | Deskripsi | Status |
 |----------|--------|-----------|--------|
-| `/` | GET | Swagger-style API Documentation | OK |
+| `/` | GET | API Documentation (Swagger-style) | OK |
 | `/ping` | GET | Health check, return "pong" | OK |
 | `/v1/models` | GET | Daftar 16 model (termasuk K2.5) | OK |
 | `/v1beta/models` | GET | Daftar model Gemini-compatible | OK |
@@ -115,7 +115,7 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 | `/auth/status` | GET | Cek status token di server (expiry, user info) | OK |
 | `/auth/clear` | GET | Hapus token dari server | OK |
 
-## Swagger-style API Documentation UI
+## API Documentation UI (Swagger-style)
 
 1. **Base URL & Server Selector** - Dropdown server selector di header
 2. **Authorize Section** - Save/cek/hapus token langsung dari halaman
