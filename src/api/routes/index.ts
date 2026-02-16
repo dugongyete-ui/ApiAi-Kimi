@@ -7,6 +7,7 @@ import token from './token.ts';
 import models from './models.ts';
 import gemini from './gemini.ts';
 import claude from './claude.ts';
+import auth from './auth.ts';
 
 export default [
     {
@@ -16,7 +17,9 @@ export default [
                 return new Response(content, {
                     type: 'html',
                     headers: {
-                        Expires: '-1'
+                        Expires: '-1',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache'
                     }
                 });
             }
@@ -27,5 +30,6 @@ export default [
     token,
     models,
     gemini,
-    claude
+    claude,
+    auth
 ];

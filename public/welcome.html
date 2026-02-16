@@ -1,535 +1,863 @@
-<!-- index.html — Tech Light Theme v2 (Flat blocks + Timeline, No background images) -->
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Kimi Free API — Layanan Aktif</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
+  <title>Kimi Free API — Interactive API Explorer</title>
   <style>
-    /* ===== Theme Variables ===== */
-    :root{
-      --bg:#F7FAFF;
-      --surface:#FFFFFF;
-      --text:#111827;
-      --muted:#4B5563;
-      --subtle:#6B7280;
-      --border:#D7E2F3;
-      --primary:#667eea;
-      --primary-2:#764ba2;
-      --accent:#0EA5E9;
-      --success:#10B981;
-      --warning:#EF4444;
-
-      --radius-lg:14px;
-      --radius-md:10px;
-      --radius-sm:8px;
-
-      --shadow-1:0 2px 0 rgba(17,24,39,0.04);
-      --shadow-2:0 6px 14px rgba(17,24,39,0.06);
-
-      --grid:24px;
+    :root {
+      --bg: #fafbfc;
+      --surface: #ffffff;
+      --text: #1b1f24;
+      --muted: #57606a;
+      --subtle: #6e7781;
+      --border: #d0d7de;
+      --border-light: #e8ecf0;
+      --primary: #667eea;
+      --primary-2: #764ba2;
+      --accent: #0969da;
+      --success: #1a7f37;
+      --success-bg: #dafbe1;
+      --warning: #cf222e;
+      --warning-bg: #ffebe9;
+      --get-color: #1a7f37;
+      --get-bg: #dafbe1;
+      --get-border: #aceebb;
+      --post-color: #0550ae;
+      --post-bg: #ddf4ff;
+      --post-border: #80ccff;
+      --radius: 8px;
+      --shadow: 0 1px 3px rgba(27,31,36,0.06), 0 1px 2px rgba(27,31,36,0.04);
+      --shadow-md: 0 4px 12px rgba(27,31,36,0.08);
+      --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
     }
 
-    /* ===== Reset ===== */
-    *,*::before,*::after{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans",system-ui,sans-serif;
-      color:var(--text);
-      line-height:1.7;
-      background: linear-gradient(180deg,var(--bg),#F5F8FF);
-    }
-    body::before{
-      content:"";
-      position:fixed; inset:0; pointer-events:none;
-      background-image:
-        linear-gradient(rgba(17,24,39,0.015) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(17,24,39,0.015) 1px, transparent 1px);
-      background-size:var(--grid) var(--grid), var(--grid) var(--grid);
-      mix-blend-mode:multiply;
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
     }
 
-    /* ===== Layout ===== */
-    .shell{max-width:1120px;margin:0 auto;padding:0 24px}
+    .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
 
-    /* ===== Nav ===== */
-    .nav{
-      position:sticky; top:0; z-index:50;
-      background:rgba(247,250,255,0.88);
-      backdrop-filter:saturate(1.05) blur(8px);
-      border-bottom:1px solid var(--border);
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: #fff;
+      padding: 32px 0 28px;
     }
-    .nav .shell{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:800}
-    .logo{
-      width:26px;height:26px;border-radius:6px;
-      background:linear-gradient(135deg,var(--primary),var(--primary-2));
+    header h1 { margin: 0 0 6px; font-size: 28px; font-weight: 800; }
+    header p { margin: 0; opacity: 0.9; font-size: 15px; }
+    .base-url-box {
+      margin-top: 16px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      backdrop-filter: blur(4px);
     }
-    .nav-links{display:flex;gap:16px}
-    .nav-links a{
-      color:var(--muted); text-decoration:none; font-weight:600;
-      padding:8px 10px; border-radius:8px;
-      transition:background-color .15s ease, color .15s ease;
-    }
-    .nav-links a:hover{color:var(--text); background:#EEF4FF}
-    .cta{display:flex;gap:10px}
-    .btn{
-      display:inline-flex; align-items:center; justify-content:center;
-      height:36px; padding:0 14px; border-radius:10px; border:1px solid var(--border);
-      background:var(--surface); color:var(--text); font-weight:700;
-      box-shadow:var(--shadow-1); text-decoration:none; cursor:pointer;
-      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-    }
-    .btn:hover{transform:translateY(-1px); box-shadow:var(--shadow-2); border-color:#C9D8EE}
-    .btn.primary{background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; border:none}
+    .base-url-box .label { font-weight: 700; opacity: 0.8; font-family: var(--font-sans); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .base-url-box .url { font-weight: 600; word-break: break-all; }
 
-    /* ===== Hero ===== */
-    .hero{padding:36px 0 18px}
-    .hero-inner{
-      display:grid; grid-template-columns:1fr; gap:18px;
-      align-items:center;
+    .section { margin: 24px 0; }
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .hero-title{margin:0 0 8px; font-size:clamp(28px,4.2vw,42px); font-weight:900; letter-spacing:.2px}
-    .hero-desc{color:var(--muted); margin:0 0 16px}
-    .hero-actions{display:flex;gap:10px;flex-wrap:wrap}
-    .stats{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px}
-    .stat{
-      display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);
-      border-radius:10px;background:#FAFCFF;font-weight:700;color:#1F2937;
-    }
-    .stat .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+    .section-icon { font-size: 20px; }
 
-    /* ===== Sections ===== */
-    .section{margin:24px 0}
-    .hd{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:10px}
-    .hd h2{margin:0; font-size:20px; font-weight:800; letter-spacing:.1px}
-    .hd p{margin:0;color:var(--subtle)}
-    .grid{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
-    @media (max-width:1024px){ .grid{grid-template-columns:repeat(3,1fr)} }
-    @media (max-width:768px){ .grid{grid-template-columns:repeat(2,1fr)} }
-    @media (max-width:520px){ .grid{grid-template-columns:1fr} }
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .auth-card label {
+      display: block;
+      font-weight: 600;
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+    .auth-card textarea {
+      width: 100%;
+      min-height: 80px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .auth-card textarea:focus { border-color: var(--primary); }
+    .auth-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn:hover { background: var(--bg); border-color: #b0b8c2; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: #fff;
+      border: none;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-success { background: var(--success); color: #fff; border: none; }
+    .btn-success:hover { opacity: 0.9; }
+    .btn-danger { background: var(--warning); color: #fff; border: none; }
+    .btn-danger:hover { opacity: 0.9; }
 
-    /* ===== Flat Blocks ===== */
-    .block{
-      border:1px solid var(--border);
-      background:var(--surface);
-      border-radius:var(--radius-md);
-      padding:14px 16px;
-      transition:border-color .12s ease, background-color .12s ease;
+    .token-info {
+      margin-top: 12px;
+      padding: 12px;
+      background: #f6f8fa;
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      font-size: 13px;
+      display: none;
     }
-    .block:hover{border-color:#C9D8EE; background:#FBFDFF}
-    .block h3{margin:0 0 6px; font-size:16px; font-weight:800}
-    .block p{margin:0; color:var(--muted); font-size:14px}
-    .block .line{
-      width:100%; height:6px; border-radius:4px; margin-bottom:10px;
-      background:linear-gradient(90deg,var(--primary),var(--primary-2));
+    .token-info.visible { display: block; }
+    .token-preview {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      word-break: break-all;
+      color: var(--muted);
+      margin: 6px 0;
+      max-height: 60px;
+      overflow: hidden;
+    }
+    .token-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .token-valid { background: var(--success-bg); color: var(--success); }
+    .token-expired { background: var(--warning-bg); color: var(--warning); }
+    .token-unknown { background: #f6f8fa; color: var(--muted); }
+
+    .endpoint-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 10px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .endpoint-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.1s;
+    }
+    .endpoint-header:hover { background: #f6f8fa; }
+    .method-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 56px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .method-get { background: var(--get-bg); color: var(--get-color); border: 1px solid var(--get-border); }
+    .method-post { background: var(--post-bg); color: var(--post-color); border: 1px solid var(--post-border); }
+    .endpoint-path {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      flex: 1;
+    }
+    .endpoint-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-left: auto;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .endpoint-toggle {
+      font-size: 18px;
+      color: var(--muted);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .endpoint-card.open .endpoint-toggle { transform: rotate(180deg); }
+
+    .endpoint-body {
+      display: none;
+      border-top: 1px solid var(--border-light);
+      padding: 16px;
+    }
+    .endpoint-card.open .endpoint-body { display: block; }
+
+    .form-group { margin-bottom: 12px; }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s;
+      font-family: var(--font-mono);
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--primary); }
+    .form-group select { font-family: var(--font-sans); }
+    .form-group textarea { min-height: 120px; resize: vertical; }
+
+    .form-row { display: flex; gap: 12px; }
+    .form-row .form-group { flex: 1; }
+    @media (max-width: 640px) { .form-row { flex-direction: column; } }
+
+    .execute-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
     }
 
-    /* ===== Timeline ===== */
-    .timeline{
-      position:relative; padding-left:28px;
-      border-left:2px solid var(--border);
+    .response-area {
+      margin-top: 16px;
+      display: none;
     }
-    .step{ margin:0 0 18px; position:relative; }
-    .step::before{
-      content:""; position:absolute; left:-10px; top:2px;
-      width:10px; height:10px; border-radius:50%;
-      background:var(--primary); box-shadow:0 0 0 3px #E7F0FF;
+    .response-area.visible { display: block; }
+    .response-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 700;
     }
-    .step h3{margin:0 0 6px; font-size:16px; font-weight:800}
-    .step p{margin:0 0 8px; color:var(--muted)}
-    .code{
-      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,"Cascadia Code","Roboto Mono",Consolas,"Courier New";
-      font-size:13px; color:#0F172A; background:#F7FAFF;
-      border:1px solid var(--border); border-radius:var(--radius-sm);
-      padding:10px 12px; overflow:auto;
+    .status-code {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+    .status-2xx { background: var(--success-bg); color: var(--success); }
+    .status-4xx, .status-5xx { background: var(--warning-bg); color: var(--warning); }
+    .response-body {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 6px;
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.5;
+      overflow-x: auto;
+      max-height: 500px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .response-body .json-key { color: #89b4fa; }
+    .response-body .json-string { color: #a6e3a1; }
+    .response-body .json-number { color: #fab387; }
+    .response-body .json-bool { color: #cba6f7; }
+    .response-body .json-null { color: #6c7086; }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    .spinner-dark {
+      border-color: rgba(0,0,0,0.1);
+      border-top-color: var(--primary);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .disclaimer {
+      margin: 24px 0;
+      padding: 14px 16px;
+      border: 1px solid #fad1d6;
+      border-left: 4px solid var(--warning);
+      background: #fff7f7;
+      border-radius: var(--radius);
+      font-size: 13px;
+      color: #6b1a20;
+    }
+    .disclaimer strong { color: #8b1c24; }
+
+    footer {
+      text-align: center;
+      padding: 24px 0;
+      color: var(--subtle);
+      font-size: 13px;
+      border-top: 1px solid var(--border-light);
+      margin-top: 24px;
     }
 
-    /* ===== API Grid ===== */
-    .api-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
-    @media (max-width:900px){ .api-grid{grid-template-columns:repeat(2,1fr)} }
-    @media (max-width:640px){ .api-grid{grid-template-columns:1fr} }
-    .api-item .path{font-family:ui-monospace,Menlo,Consolas; font-size:13px; color:#1F2937}
-    .tag{
-      display:inline-flex; align-items:center; gap:6px;
-      padding:4px 8px; border:1px solid var(--border); border-radius:999px;
-      background:#F2F7FF; color:#1F2937; font-weight:700; font-size:12px; margin-top:8px;
-    }
-    .tag .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
-
-    /* ===== Models & Ecosystem ===== */
-    .label{color:var(--subtle); font-weight:700; font-size:12px; margin-top:6px}
-
-    /* ===== Warning ===== */
-    .warn{
-      border:1px solid #FAD1D6;
-      border-left:4px solid var(--warning);
-      background:#FFF7F7;
-      border-radius:var(--radius-md);
-      padding:14px 16px;
-    }
-    .warn h3{margin:0 0 6px; color:#8B1C24}
-    .warn p{margin:0; color:#6B1A20}
-
-    /* ===== Service Status (14px) ===== */
-    .service-status{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      background:#EAF7EF;
-      border:1px solid #CDE9D6;
-      border-left:4px solid #4CAF50;
-      color:#1F5E2E;
-      padding:14px 16px;
-      font-weight:800;
-      position:sticky;
-      top:0;
-      z-index:100;
-      margin-top:12px;
-      margin-bottom:0;
-      border-radius:10px;
-      box-shadow:0 6px 14px rgba(17,24,39,0.06);
-      transform:translateY(-120%);
-      opacity:0;
-      transition:transform .36s cubic-bezier(0.22, 1, 0.36, 1), opacity .24s ease;
-    }
-    .service-status.visible{
-      transform:translateY(0);
-      opacity:1;
-    }
-    .service-status:hover{
-      box-shadow:0 10px 22px rgba(17,24,39,0.08);
-    }
-    .service-status .status-dot{
-      width:10px;
-      height:10px;
-      background:#4CAF50;
-      border-radius:50%;
-      display:inline-block;
-      margin-right:6px;
-      animation:pulse 2s infinite;
-      box-shadow:0 0 0 3px rgba(76,175,80,0.16);
-    }
-    .service-status .label{
-      font-weight:800;
-      color:#1F5E2E;
-      letter-spacing:0.2px;
-      font-size:14px;
-      line-height:1.3;
-    }
-    .service-status .close-btn{
-      position:absolute;
-      right:12px;
-      top:50%;
-      transform:translateY(-50%);
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width:28px; height:28px;
-      border-radius:8px;
-      border:1px solid #CDE9D6;
-      background:#F4FBF6;
-      color:#2E7D32;
-      cursor:pointer;
-      font-weight:800;
-      font-size:16px;
-      line-height:1;
-      transition:background-color .15s ease, border-color .15s ease, transform .12s ease;
-    }
-    .service-status .close-btn:hover{
-      background:#E6F6EC;
-      border-color:#BEE3CA;
-      transform:translateY(-50%) scale(1.02);
-    }
-    @keyframes pulse{
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius);
+      z-index: 10;
     }
 
-    /* ===== Custom Kimi Styles ===== */
-    .token-display{
-      background:linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
-      color:#234e52;
-      padding:6px 10px; 
-      border-radius:6px; 
-      font-family:'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-      font-size:12px;
-      border:1px solid #81e6d9;
-      display:inline-block;
-      margin:2px;
-      box-shadow:0 2px 4px rgba(0, 0, 0, 0.05);
+    @media (max-width: 640px) {
+      header h1 { font-size: 22px; }
+      .endpoint-desc { display: none; }
+      .container { padding: 0 14px; }
+      .endpoint-header { padding: 10px 12px; gap: 8px; }
+      .method-badge { min-width: 44px; font-size: 11px; padding: 3px 6px; }
+      .endpoint-path { font-size: 12px; }
     }
 
-    .method-step{
-      background:#FAFCFF;
-      border:1px solid var(--border);
-      border-radius:var(--radius-md);
-      padding:16px;
-      margin:12px 0;
-      transition:all .12s ease;
-    }
-    .method-step:hover{
-      border-color:#C9D8EE;
-      background:#FBFDFF;
-    }
-    .method-step h4{
-      margin:0 0 8px;
-      font-size:15px;
-      font-weight:800;
-      color:var(--text);
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    .method-number{
-      width:24px;height:24px;border-radius:6px;
-      background:linear-gradient(135deg,var(--primary),var(--primary-2));
-      color:white;display:flex;align-items:center;justify-content:center;
-      font-size:12px;font-weight:800;
-    }
-    .method-step ul{
-      margin:8px 0 0 0;padding-left:0;list-style:none;
-    }
-    .method-step li{
-      padding:6px 0;color:var(--muted);font-size:14px;
-      position:relative;padding-left:16px;
-    }
-    .method-step li::before{
-      content:"•";position:absolute;left:0;color:var(--primary);font-weight:800;
-    }
-    .method-step img{
-      max-width:100%;height:auto;border-radius:8px;margin:12px 0;
-      box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    .optgroup-label {
+      font-weight: 700;
+      color: var(--text);
     }
   </style>
 </head>
 <body>
 
-  <main class="shell">
-    <!-- Status Layanan -->
-    <div class="service-status" id="serviceStatus" role="status" aria-live="polite">
-      <span class="status-dot" aria-hidden="true"></span>
-      <span class="label">Kimi-Free-API layanan sudah aktif, silakan gunakan klien untuk terhubung</span>
-      <button class="close-btn" id="serviceStatusClose" aria-label="Tutup notifikasi" title="Tutup notifikasi">×</button>
+  <header>
+    <div class="container">
+      <h1>Kimi Free API Explorer</h1>
+      <p>Interactive API documentation & testing interface. Compatible with OpenAI, Claude, and Gemini formats.</p>
+      <div class="base-url-box">
+        <span class="label">Base URL</span>
+        <span class="url" id="baseUrl">Loading...</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="disclaimer">
+      <strong>Disclaimer:</strong> This is a reverse-engineered API and may be unstable. It is recommended to use the official paid API for production use. This project is for research and learning purposes only, not for commercial use.
     </div>
 
-    <!-- Hero -->
-    <section class="hero">
-      <div class="hero-inner">
-        <div>
-          <h1 class="hero-title">Proxy API AI Multi-Model untuk Developer</h1>
-        <p class="hero-desc">Kompatibel dengan protokol OpenAI API, mendukung berbagai model Kimi, output streaming yang stabil, percakapan multi-putaran, dan pencarian internet. Arsitektur bersih, mudah diintegrasikan, dan mudah dipelihara.</p>
-          <div class="hero-actions">
-            <a class="btn primary" href="#guide">Panduan Cepat</a>
-            <a class="btn" href="#apis">Lihat Endpoint</a>
+    <section class="section" id="auth-section">
+      <div class="section-title">
+        <span class="section-icon">&#128274;</span>
+        Authentication
+      </div>
+      <div class="auth-card">
+        <label for="cookieInput">Paste full cookie string or kimi-auth JWT token</label>
+        <textarea id="cookieInput" placeholder='Paste cookies like: _ga=...; kimi-auth=eyJhbGci... &#10;Or just the JWT token: eyJhbGci...'></textarea>
+        <div class="auth-actions">
+          <button class="btn btn-primary" onclick="extractToken()">Extract & Save Token</button>
+          <button class="btn" onclick="loadSavedToken()">Load Saved</button>
+          <button class="btn btn-danger" onclick="clearToken()">Clear Token</button>
+        </div>
+        <div class="token-info" id="tokenInfo">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <strong>Token Status:</strong>
+            <span class="token-status" id="tokenStatus"></span>
           </div>
+          <div class="token-preview" id="tokenPreview"></div>
         </div>
       </div>
     </section>
 
-    <!-- Peringatan -->
-    <section class="section">
-      <div class="warn">
-        <h3>Penyangkalan</h3>
-        <p><strong>API reverse-engineer bersifat tidak stabil. Disarankan menggunakan API resmi berbayar untuk menghindari risiko pemblokiran.</strong></p>
-        <p><strong>Proyek ini hanya untuk riset dan pembelajaran. Tidak menerima transaksi apapun. Hanya untuk penggunaan pribadi, dilarang untuk komersial atau layanan publik.</strong></p>
+    <section class="section" id="api-section">
+      <div class="section-title">
+        <span class="section-icon">&#128640;</span>
+        API Endpoints
       </div>
+      <div id="endpointList"></div>
     </section>
-
-    <!-- Fitur Utama -->
-    <section id="features" class="section">
-      <div class="hd">
-        <h2>Fitur Utama</h2>
-      </div>
-      <div class="grid">
-        <div class="block">
-          <div class="line" aria-hidden="true"></div>
-          <h3>Output Streaming</h3>
-          <p>Respons byte pertama dalam milidetik, menghasilkan sambil mengirim, meningkatkan performa interaksi (SSE/Web/CLI).</p>
-        </div>
-        <div class="block">
-          <div class="line" aria-hidden="true"></div>
-          <h3>Percakapan Multi-Putaran</h3>
-          <p>Memori dan kompresi konteks, menjamin respons stabil untuk percakapan panjang (manajemen Token dan strategi pemotongan).</p>
-        </div>
-        <div class="block">
-          <div class="line" aria-hidden="true"></div>
-          <h3>Pencarian Internet</h3>
-          <p>Agregasi informasi real-time, meningkatkan ketepatan waktu dan akurasi jawaban (Provider dapat diganti).</p>
-        </div>
-        <div class="block">
-          <div class="line" aria-hidden="true"></div>
-          <h3>Dukungan Multi-Model</h3>
-          <p>Integrasi mendalam dengan Kimi/Gemini/Claude, tiga AI besar dalam satu paket dengan kemampuan multimodal yang kuat.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Panduan: Timeline -->
-    <section id="guide" class="section">
-      <div class="hd">
-        <h2>Panduan Integrasi</h2>
-      </div>
-      <div class="timeline">
-        <div class="step">
-          <h3>01 · Mendapatkan Token Kimi (Cara 1: Fitur Lengkap)</h3>
-          <p>Dapatkan <code>refresh_token</code> dari <a href="https://kimi.moonshot.cn" target="_blank" rel="noreferrer">kimi.moonshot.cn</a></p>
-          <p>1. Masuk ke Kimi dan mulai percakapan apapun<br>2. Tekan F12 untuk membuka Developer Tools<br>3. Cari nilai <code>refresh_token</code> di Application &gt; Local Storage</p>
-          <pre class="code">Authorization: Bearer REFRESH_TOKEN_ANDA</pre>
-          <p><strong>Fitur yang didukung:</strong> Percakapan dasar, Percakapan multi-putaran, Pencarian internet, Upload file, Analisis gambar, Percakapan agen AI, Mode eksplorasi, Model K1/K2</p>
-        </div>
-        <div class="step">
-          <h3>02 · Mendapatkan Token Kimi (Cara 2: Percakapan Dasar)</h3>
-          <p>Dapatkan Cookie <code>kimi-auth</code> dari <a href="https://kimi.moonshot.cn" target="_blank" rel="noreferrer">kimi.moonshot.cn</a></p>
-          <p>1. Kunjungi https://kimi.moonshot.cn dan login<br>2. Tekan F12 untuk membuka Developer Tools<br>3. Buka Application &gt; Cookies &gt; https://www.kimi.com<br>4. Cari Cookie <code>kimi-auth</code><br>5. Salin nilai JWT token lengkap (diawali dengan <code>eyJ</code>)</p>
-          <pre class="code">Authorization: Bearer TOKEN_JWT_KIMI_AUTH_ANDA</pre>
-          <p><strong>Fitur yang didukung:</strong> Percakapan dasar, Respons streaming, Berbagai skenario (K2, Pencarian, Riset)<br><strong>Tidak didukung:</strong> Percakapan multi-putaran, Upload file, Analisis gambar, Percakapan agen AI</p>
-        </div>
-        <div class="step">
-          <h3>03 · Pemilihan API Otomatis</h3>
-          <p>Layanan akan secara otomatis memilih API yang sesuai berdasarkan jenis Token:</p>
-          <ul>
-            <li><strong>JWT Token (typ: access)</strong> &rarr; Menggunakan Connect RPC API</li>
-            <li><strong>Refresh Token (typ: refresh)</strong> &rarr; Menggunakan API Tradisional</li>
-          </ul>
-          <p><strong>Rekomendasi:</strong></p>
-          <ul>
-            <li>Untuk fitur lengkap, gunakan <strong>API Tradisional</strong> (refresh_token)</li>
-            <li>Untuk percakapan dasar saja, bisa gunakan <strong>Connect RPC</strong> (kimi-auth)</li>
-          </ul>
-        </div>
-        <div class="step">
-          <h3>04 · Rotasi Multi-Akun</h3>
-          <p>Kimi membatasi akun biasa menjadi 30 putaran tanya-jawab teks panjang setiap 3 jam (teks pendek tidak dibatasi). Anda bisa menggunakan beberapa refresh_token secara bergantian:</p>
-          <pre class="code">Authorization: Bearer TOKEN1,TOKEN2,TOKEN3</pre>
-          <p>Setiap request, layanan akan memilih salah satu token secara acak.</p>
-        </div>
-        <div class="step">
-          <h3>05 · Contoh Pemanggilan API</h3>
-          <p>Menggunakan endpoint yang kompatibel dengan OpenAI:</p>
-          <pre class="code">curl -X POST /v1/chat/completions \
-  -H "Authorization: Bearer TOKEN_ANDA" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "kimi-k2",
-    "messages": [
-      {
-        "role": "user",
-        "content": "Halo"
-      }
-    ],
-    "use_search": false,
-    "stream": false
-  }'</pre>
-        </div>
-      </div>
-    </section>
-
-    <!-- API -->
-    <section id="apis" class="section">
-      <div class="hd">
-        <h2>Kompatibilitas Endpoint</h2>
-      </div>
-      <div class="api-grid">
-        <div class="block api-item">
-          <h3>Kompatibel OpenAI</h3>
-          <div class="path">/v1/chat/completions</div>
-          <span class="tag"><span class="dot"></span> Direkomendasikan</span>
-        </div>
-        <div class="block api-item">
-          <h3>Kompatibel Google Gemini</h3>
-          <div class="path">/v1beta/models/:model:generateContent</div>
-          <span class="tag"><span class="dot"></span> gemini-cli</span>
-        </div>
-        <div class="block api-item">
-          <h3>Kompatibel Anthropic Claude</h3>
-          <div class="path">/v1/messages</div>
-          <span class="tag"><span class="dot"></span> claude-code</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Model yang Didukung -->
-    <section id="models" class="section">
-      <div class="hd">
-        <h2>Model yang Didukung</h2>
-      </div>
-      <div class="grid">
-        <div class="block">
-          <div class="line" aria-hidden="true"></div>
-          <h3>Kimi K2 Series</h3>
-          <p>Seri model K2 terbaru, kemampuan penalaran meningkat drastis, mendukung Agentic Coding.</p>
-          <div class="label">kimi-k2-0905-preview (konteks 256k)</div>
-          <div class="label">kimi-k2-0711-preview (konteks 128k)</div>
-          <div class="label">kimi-k2-turbo-preview (versi kecepatan tinggi)</div>
-          <div class="label">kimi-k2-thinking (model berpikir panjang)</div>
-        </div>
-        <div class="block">
-          <div class="line" aria-hidden="true"></div>
-          <h3>Moonshot V1 Series</h3>
-          <p>Seri model V1 yang matang, berbagai panjang konteks untuk memenuhi kebutuhan pembuatan teks.</p>
-          <div class="label">moonshot-v1-8k (teks pendek)</div>
-          <div class="label">moonshot-v1-32k (teks panjang)</div>
-          <div class="label">moonshot-v1-128k (teks sangat panjang)</div>
-        </div>
-        <div class="block">
-          <div class="line" aria-hidden="true"></div>
-          <h3>Model Vision (Penglihatan)</h3>
-          <p>Model multimodal yang mendukung pemahaman gambar dan teks, dapat menganalisis konten gambar.</p>
-          <div class="label">Moonshot-Vision-8K</div>
-          <div class="label">Moonshot-Vision-32K</div>
-          <div class="label">Moonshot-Vision-128K</div>
-        </div>
-        <div class="block">
-          <div class="line" aria-hidden="true"></div>
-          <h3>Kimi Latest</h3>
-          <p>Model terdepan terbaru, terus diperbarui dan dioptimasi, dengan kemampuan pemahaman visual terbaru.</p>
-          <div class="label">kimi-latest</div>
-          <div class="label">Pemahaman gambar konteks 128k</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Ekosistem Klien -->
-    <section id="ecosystem" class="section">
-      <div class="hd">
-        <h2>Ekosistem Klien</h2>
-      </div>
-      <div class="grid">
-        <div class="block"><h3>LobeChat</h3><p>Antarmuka chat modern.</p></div>
-        <div class="block"><h3>NextChat</h3><p>Klien multi-platform yang simpel.</p></div>
-        <div class="block"><h3>Dify</h3><p>Platform pengembangan aplikasi AI.</p></div>
-        <div class="block"><h3>OpenAI SDK</h3><p>Integrasi langsung via kode.</p></div>
-        <div class="block"><h3>ChatBox</h3><p>Aplikasi chat untuk desktop.</p></div>
-        <div class="block"><h3>Jelajahi Lainnya</h3><p>Lebih banyak klien sedang dalam proses adaptasi.</p></div>
-      </div>
-    </section>
-    <br></br>
-
   </main>
 
+  <footer>
+    <div class="container">
+      Kimi Free API Explorer &mdash; Built for developers
+    </div>
+  </footer>
+
   <script>
-    (function(){
-      const bar = document.getElementById('serviceStatus');
-      const closeBtn = document.getElementById('serviceStatusClose');
-      if(!bar || !closeBtn) return;
+    const BASE_URL = window.location.origin;
+    document.getElementById('baseUrl').textContent = BASE_URL;
 
-      requestAnimationFrame(() => {
-        bar.classList.add('visible');
+    const MODELS = {
+      'K2.5': ['kimi-k2.5-instant', 'kimi-k2.5-thinking', 'kimi-k2.5-agent', 'kimi-k2.5-agent-swarm'],
+      'K2': ['kimi-k2-0905-preview', 'kimi-k2-0711-preview', 'kimi-k2-turbo-preview', 'kimi-k2-thinking', 'kimi-k2-thinking-turbo'],
+      'Moonshot': ['moonshot-v1-8k', 'moonshot-v1-32k', 'moonshot-v1-128k'],
+      'Vision': ['moonshot-v1-8k-vision-preview', 'moonshot-v1-32k-vision-preview', 'moonshot-v1-128k-vision-preview'],
+      'Latest': ['kimi-latest']
+    };
+
+    let fetchedModels = null;
+
+    const ENDPOINTS = [
+      {
+        method: 'GET', path: '/ping', desc: 'Health check',
+        hasBody: false, hasModel: false, hasAuth: false
+      },
+      {
+        method: 'GET', path: '/v1/models', desc: 'List available models',
+        hasBody: false, hasModel: false, hasAuth: false
+      },
+      {
+        method: 'POST', path: '/v1/chat/completions', desc: 'Chat completion (OpenAI format)',
+        hasBody: true, hasModel: true, hasAuth: true, hasStream: true,
+        defaultBody: {
+          model: 'kimi-k2.5-instant',
+          messages: [{ role: 'user', content: 'Hello' }],
+          stream: false
+        }
+      },
+      {
+        method: 'POST', path: '/v1/messages', desc: 'Chat completion (Claude format)',
+        hasBody: true, hasModel: true, hasAuth: true, hasStream: true,
+        defaultBody: {
+          model: 'kimi-k2.5-instant',
+          max_tokens: 1024,
+          messages: [{ role: 'user', content: 'Hello' }],
+          stream: false
+        }
+      },
+      {
+        method: 'POST', path: '/v1beta/models/:model:generateContent', desc: 'Content generation (Gemini format)',
+        hasBody: true, hasModel: true, hasAuth: true, hasModelInPath: true,
+        defaultBody: {
+          contents: [{ parts: [{ text: 'Hello' }] }]
+        }
+      },
+      {
+        method: 'POST', path: '/v1beta/models/:model:streamGenerateContent', desc: 'Streaming content (Gemini format)',
+        hasBody: true, hasModel: true, hasAuth: true, hasModelInPath: true,
+        defaultBody: {
+          contents: [{ parts: [{ text: 'Hello' }] }]
+        }
+      },
+      {
+        method: 'GET', path: '/v1beta/models', desc: 'List Gemini models',
+        hasBody: false, hasModel: false, hasAuth: false
+      },
+      {
+        method: 'POST', path: '/token/check', desc: 'Check token validity',
+        hasBody: true, hasModel: false, hasAuth: false,
+        defaultBody: { token: '' }
+      },
+      {
+        method: 'POST', path: '/auth/extract', desc: 'Extract kimi-auth from cookies',
+        hasBody: true, hasModel: false, hasAuth: false,
+        defaultBody: { cookie: '_ga=...; kimi-auth=eyJ...' }
+      }
+    ];
+
+    function getToken() {
+      return localStorage.getItem('kimi_auth_token') || '';
+    }
+
+    function decodeJWT(token) {
+      try {
+        const parts = token.split('.');
+        if (parts.length !== 3) return null;
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        return payload;
+      } catch { return null; }
+    }
+
+    function extractToken() {
+      const input = document.getElementById('cookieInput').value.trim();
+      if (!input) return;
+
+      let token = '';
+      if (input.startsWith('eyJ')) {
+        token = input.split(';')[0].trim();
+      } else {
+        const match = input.match(/kimi-auth=([^;\s]+)/);
+        if (match) {
+          token = match[1];
+        } else {
+          const jwtMatch = input.match(/(eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)/);
+          if (jwtMatch) token = jwtMatch[1];
+        }
+      }
+
+      if (!token) {
+        alert('Could not find a valid JWT token. Please paste a cookie string containing kimi-auth or a JWT token starting with eyJ...');
+        return;
+      }
+
+      localStorage.setItem('kimi_auth_token', token);
+      showTokenInfo(token);
+      updateAuthFields();
+    }
+
+    function loadSavedToken() {
+      const token = getToken();
+      if (token) {
+        document.getElementById('cookieInput').value = token;
+        showTokenInfo(token);
+      } else {
+        alert('No saved token found.');
+      }
+    }
+
+    function clearToken() {
+      localStorage.removeItem('kimi_auth_token');
+      document.getElementById('cookieInput').value = '';
+      document.getElementById('tokenInfo').classList.remove('visible');
+      updateAuthFields();
+    }
+
+    function showTokenInfo(token) {
+      const info = document.getElementById('tokenInfo');
+      const status = document.getElementById('tokenStatus');
+      const preview = document.getElementById('tokenPreview');
+
+      info.classList.add('visible');
+      preview.textContent = token.substring(0, 80) + (token.length > 80 ? '...' : '');
+
+      const payload = decodeJWT(token);
+      if (payload && payload.exp) {
+        const expDate = new Date(payload.exp * 1000);
+        const now = new Date();
+        if (expDate > now) {
+          status.className = 'token-status token-valid';
+          status.textContent = '\u2713 Valid \u2014 Expires: ' + expDate.toLocaleString();
+        } else {
+          status.className = 'token-status token-expired';
+          status.textContent = '\u2717 Expired: ' + expDate.toLocaleString();
+        }
+      } else {
+        status.className = 'token-status token-unknown';
+        status.textContent = 'Token saved (expiry unknown)';
+      }
+    }
+
+    function updateAuthFields() {
+      const token = getToken();
+      document.querySelectorAll('.auth-input').forEach(el => {
+        el.value = token ? 'Bearer ' + token : '';
       });
+    }
 
-      closeBtn.addEventListener('click', () => {
-        bar.classList.remove('visible');
-        const onEnd = () => {
-          bar.style.display = 'none';
-          bar.removeEventListener('transitionend', onEnd);
-        };
-        bar.addEventListener('transitionend', onEnd);
-      }, { passive: true });
-    })();
+    function buildModelSelect(id) {
+      let html = '<select id="' + id + '" class="model-select" style="font-family:var(--font-sans)">';
+      for (const [group, models] of Object.entries(MODELS)) {
+        html += '<optgroup label="' + group + '">';
+        for (const m of models) {
+          html += '<option value="' + m + '">' + m + '</option>';
+        }
+        html += '</optgroup>';
+      }
+      html += '</select>';
+      return html;
+    }
+
+    function syntaxHighlight(json) {
+      if (typeof json !== 'string') json = JSON.stringify(json, null, 2);
+      return json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/("(\\u[a-fA-F0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?)/g, function(match) {
+          let cls = 'json-string';
+          if (/:$/.test(match)) {
+            cls = 'json-key';
+            return '<span class="' + cls + '">' + match.slice(0, -1) + '</span>:';
+          }
+          return '<span class="' + cls + '">' + match + '</span>';
+        })
+        .replace(/\b(true|false)\b/g, '<span class="json-bool">$1</span>')
+        .replace(/\bnull\b/g, '<span class="json-null">null</span>')
+        .replace(/\b(-?\d+\.?\d*([eE][+-]?\d+)?)\b/g, '<span class="json-number">$1</span>');
+    }
+
+    function renderEndpoints() {
+      const container = document.getElementById('endpointList');
+      container.innerHTML = '';
+
+      ENDPOINTS.forEach((ep, idx) => {
+        const card = document.createElement('div');
+        card.className = 'endpoint-card';
+        card.id = 'ep-' + idx;
+
+        const methodClass = ep.method === 'GET' ? 'method-get' : 'method-post';
+
+        let bodyHtml = '';
+        if (ep.hasBody || ep.hasModel || ep.hasAuth) {
+          bodyHtml += '<div class="endpoint-body">';
+
+          if (ep.hasAuth) {
+            bodyHtml += '<div class="form-group"><label>Authorization</label>';
+            bodyHtml += '<input type="text" class="auth-input" id="auth-' + idx + '" placeholder="Bearer your-token-here" value="' + (getToken() ? 'Bearer ' + getToken() : '') + '"/></div>';
+          }
+
+          if (ep.hasModel) {
+            bodyHtml += '<div class="form-row">';
+            bodyHtml += '<div class="form-group"><label>Model</label>' + buildModelSelect('model-' + idx) + '</div>';
+            if (ep.hasStream) {
+              bodyHtml += '<div class="form-group"><label>Streaming</label><select id="stream-' + idx + '"><option value="false">No</option><option value="true">Yes</option></select></div>';
+            }
+            bodyHtml += '</div>';
+          }
+
+          if (ep.hasBody) {
+            const body = ep.defaultBody ? JSON.stringify(ep.defaultBody, null, 2) : '{}';
+            bodyHtml += '<div class="form-group"><label>Request Body</label>';
+            bodyHtml += '<textarea id="body-' + idx + '">' + body + '</textarea></div>';
+          }
+
+          bodyHtml += '<div class="execute-bar">';
+          bodyHtml += '<button class="btn btn-primary" onclick="executeRequest(' + idx + ')">&#9654; Execute</button>';
+          bodyHtml += '<span id="loader-' + idx + '" style="display:none"><span class="spinner spinner-dark"></span></span>';
+          bodyHtml += '</div>';
+
+          bodyHtml += '<div class="response-area" id="response-' + idx + '">';
+          bodyHtml += '<div class="response-header">Response <span class="status-code" id="status-' + idx + '"></span></div>';
+          bodyHtml += '<pre class="response-body" id="respBody-' + idx + '"></pre>';
+          bodyHtml += '</div>';
+
+          bodyHtml += '</div>';
+        } else {
+          bodyHtml += '<div class="endpoint-body">';
+          bodyHtml += '<div class="execute-bar">';
+          bodyHtml += '<button class="btn btn-primary" onclick="executeRequest(' + idx + ')">&#9654; Execute</button>';
+          bodyHtml += '<span id="loader-' + idx + '" style="display:none"><span class="spinner spinner-dark"></span></span>';
+          bodyHtml += '</div>';
+          bodyHtml += '<div class="response-area" id="response-' + idx + '">';
+          bodyHtml += '<div class="response-header">Response <span class="status-code" id="status-' + idx + '"></span></div>';
+          bodyHtml += '<pre class="response-body" id="respBody-' + idx + '"></pre>';
+          bodyHtml += '</div>';
+          bodyHtml += '</div>';
+        }
+
+        card.innerHTML = '<div class="endpoint-header" onclick="toggleEndpoint(' + idx + ')">' +
+          '<span class="method-badge ' + methodClass + '">' + ep.method + '</span>' +
+          '<span class="endpoint-path">' + ep.path + '</span>' +
+          '<span class="endpoint-desc">' + ep.desc + '</span>' +
+          '<span class="endpoint-toggle">&#9660;</span>' +
+          '</div>' + bodyHtml;
+
+        container.appendChild(card);
+      });
+    }
+
+    function toggleEndpoint(idx) {
+      const card = document.getElementById('ep-' + idx);
+      card.classList.toggle('open');
+    }
+
+    async function executeRequest(idx) {
+      const ep = ENDPOINTS[idx];
+      const loader = document.getElementById('loader-' + idx);
+      const responseArea = document.getElementById('response-' + idx);
+      const statusEl = document.getElementById('status-' + idx);
+      const respBody = document.getElementById('respBody-' + idx);
+
+      loader.style.display = 'inline-block';
+      responseArea.classList.remove('visible');
+
+      let url = BASE_URL + ep.path;
+      const opts = { method: ep.method, headers: {} };
+
+      if (ep.hasAuth) {
+        const authVal = document.getElementById('auth-' + idx).value.trim();
+        if (authVal) opts.headers['Authorization'] = authVal;
+      }
+
+      let bodyObj = null;
+      if (ep.hasBody) {
+        try {
+          bodyObj = JSON.parse(document.getElementById('body-' + idx).value);
+        } catch(e) {
+          loader.style.display = 'none';
+          responseArea.classList.add('visible');
+          statusEl.className = 'status-code status-4xx';
+          statusEl.textContent = 'ERR';
+          respBody.textContent = 'Invalid JSON in request body: ' + e.message;
+          return;
+        }
+      }
+
+      if (ep.hasModel) {
+        const model = document.getElementById('model-' + idx).value;
+        if (bodyObj) bodyObj.model = model;
+        if (ep.hasModelInPath) {
+          url = BASE_URL + ep.path.replace(':model', model);
+        }
+      }
+
+      let isStream = false;
+      if (ep.hasStream) {
+        isStream = document.getElementById('stream-' + idx).value === 'true';
+        if (bodyObj) bodyObj.stream = isStream;
+      }
+
+      if (bodyObj) {
+        opts.headers['Content-Type'] = 'application/json';
+        opts.body = JSON.stringify(bodyObj);
+      }
+
+      try {
+        const res = await fetch(url, opts);
+        const statusCode = res.status;
+        statusEl.textContent = statusCode;
+        statusEl.className = 'status-code ' + (statusCode >= 200 && statusCode < 300 ? 'status-2xx' : statusCode >= 400 && statusCode < 500 ? 'status-4xx' : 'status-5xx');
+
+        if (isStream && res.ok) {
+          responseArea.classList.add('visible');
+          respBody.innerHTML = '';
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let accumulated = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            accumulated += chunk;
+            respBody.textContent = accumulated;
+            respBody.scrollTop = respBody.scrollHeight;
+          }
+        } else {
+          const text = await res.text();
+          let formatted;
+          try {
+            const json = JSON.parse(text);
+            formatted = syntaxHighlight(JSON.stringify(json, null, 2));
+          } catch {
+            formatted = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          }
+          respBody.innerHTML = formatted;
+          responseArea.classList.add('visible');
+        }
+      } catch(e) {
+        statusEl.className = 'status-code status-5xx';
+        statusEl.textContent = 'ERR';
+        respBody.textContent = 'Request failed: ' + e.message;
+        responseArea.classList.add('visible');
+      }
+
+      loader.style.display = 'none';
+    }
+
+    async function fetchModels() {
+      try {
+        const res = await fetch(BASE_URL + '/v1/models');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.data && Array.isArray(data.data)) {
+            fetchedModels = data.data.map(m => m.id || m);
+            updateModelSelects();
+          }
+        }
+      } catch {}
+    }
+
+    function updateModelSelects() {
+      if (!fetchedModels || fetchedModels.length === 0) return;
+      document.querySelectorAll('.model-select').forEach(sel => {
+        const currentVal = sel.value;
+        sel.innerHTML = '';
+
+        for (const [group, models] of Object.entries(MODELS)) {
+          const optgroup = document.createElement('optgroup');
+          optgroup.label = group;
+          for (const m of models) {
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = m;
+            optgroup.appendChild(opt);
+          }
+          sel.appendChild(optgroup);
+        }
+
+        const extraModels = fetchedModels.filter(fm => {
+          return !Object.values(MODELS).flat().includes(fm);
+        });
+        if (extraModels.length > 0) {
+          const optgroup = document.createElement('optgroup');
+          optgroup.label = 'Other (from API)';
+          for (const m of extraModels) {
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = m;
+            optgroup.appendChild(opt);
+          }
+          sel.appendChild(optgroup);
+        }
+
+        if (currentVal && [...sel.options].some(o => o.value === currentVal)) {
+          sel.value = currentVal;
+        }
+      });
+    }
+
+    function init() {
+      renderEndpoints();
+      const saved = getToken();
+      if (saved) {
+        showTokenInfo(saved);
+      }
+      fetchModels();
+    }
+
+    init();
   </script>
 </body>
 </html>

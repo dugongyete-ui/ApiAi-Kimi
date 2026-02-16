@@ -135,20 +135,24 @@ export async function createCompletionV2(
     // 创建客户端
     const client = new ConnectRPCClient(config);
 
-    // 确定场景类型
     let scenario = 'SCENARIO_K2';
-    if (model.includes('search')) {
+    if (model.includes('k2.5') || model.includes('k2-5')) {
+        scenario = 'SCENARIO_K2';
+    } else if (model.includes('search')) {
         scenario = 'SCENARIO_SEARCH';
-    } else if (model.includes('research')) {
+    } else if (model.includes('research') || model.includes('agent-swarm') || model.includes('swarm')) {
+        scenario = 'SCENARIO_RESEARCH';
+    } else if (model.includes('agent')) {
         scenario = 'SCENARIO_RESEARCH';
     } else if (model.includes('k1')) {
         scenario = 'SCENARIO_K1';
     }
 
-    // 发送请求
+    const isThinking = model.includes('thinking');
+
     const response = await client.chatText(messageContent, {
         scenario: scenario as any,
-        thinking: model.includes('thinking'),
+        thinking: isThinking,
     });
 
     // 转换为 OpenAI 兼容格式
@@ -261,11 +265,14 @@ export async function createCompletionStreamV2(
     // 创建客户端
     const client = new ConnectRPCClient(config);
 
-    // 确定场景
     let scenario = 'SCENARIO_K2';
-    if (model.includes('search')) {
+    if (model.includes('k2.5') || model.includes('k2-5')) {
+        scenario = 'SCENARIO_K2';
+    } else if (model.includes('search')) {
         scenario = 'SCENARIO_SEARCH';
-    } else if (model.includes('research')) {
+    } else if (model.includes('research') || model.includes('agent-swarm') || model.includes('swarm')) {
+        scenario = 'SCENARIO_RESEARCH';
+    } else if (model.includes('agent')) {
         scenario = 'SCENARIO_RESEARCH';
     } else if (model.includes('k1')) {
         scenario = 'SCENARIO_K1';
