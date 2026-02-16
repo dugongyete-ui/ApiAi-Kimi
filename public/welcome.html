@@ -806,31 +806,33 @@
     }
 
     const MODELS_DATA = {
-      'K2.5 Series (Terbaru)': [
-        { id: 'kimi-k2.5-instant', label: 'K2.5 Instant', desc: 'Quick response, 3-8s' },
-        { id: 'kimi-k2.5-thinking', label: 'K2.5 Thinking', desc: 'Deep thinking', starred: true },
-        { id: 'kimi-k2.5-agent', label: 'K2.5 Agent', desc: 'Research, slides, docs', starred: true },
-        { id: 'kimi-k2.5-agent-swarm', label: 'K2.5 Agent Swarm', desc: '100 parallel sub-agents' },
+      'Chat Santai & Tanya Jawab': [
+        { id: 'kimi-k2.5-instant', label: 'K2.5 Instant', desc: 'Chat santai, respons cepat 3-8s', starred: true, rec: 'Chat Santai' },
+        { id: 'kimi-k2-turbo-preview', label: 'K2-Turbo', desc: 'Chat super cepat 60-100 token/s', rec: 'Chat Cepat' },
+        { id: 'moonshot-v1-8k', label: 'Moonshot-8K', desc: 'Chat ringan, hemat resource', rec: 'Chat Ringan' },
       ],
-      'K2 Series': [
-        { id: 'kimi-k2-0905-preview', label: 'K2-0905', desc: '256k, Agentic Coding', starred: true },
-        { id: 'kimi-k2-0711-preview', label: 'K2-0711', desc: '128k, 1T MoE' },
-        { id: 'kimi-k2-turbo-preview', label: 'K2-Turbo', desc: '60-100 tokens/s' },
-        { id: 'kimi-k2-thinking', label: 'K2-Thinking', desc: 'Deep reasoning', starred: true },
-        { id: 'kimi-k2-thinking-turbo', label: 'K2-Thinking-Turbo', desc: 'Fast deep reasoning' },
+      'Coding & Programming': [
+        { id: 'kimi-k2-0905-preview', label: 'K2-0905', desc: 'Terbaik untuk coding, 256k context', starred: true, rec: 'Coding' },
+        { id: 'kimi-k2.5-thinking', label: 'K2.5 Thinking', desc: 'Debug kode kompleks, chain-of-thought', starred: true, rec: 'Debug Kode' },
+        { id: 'kimi-k2-thinking', label: 'K2-Thinking', desc: 'Arsitektur & logic kompleks', rec: 'Logic Kompleks' },
+        { id: 'kimi-k2-thinking-turbo', label: 'K2-Thinking-Turbo', desc: 'Deep reasoning cepat 60-100 token/s', rec: 'Reasoning Cepat' },
       ],
-      'Moonshot V1': [
-        { id: 'moonshot-v1-8k', label: 'Moonshot-8K', desc: '8k context' },
-        { id: 'moonshot-v1-32k', label: 'Moonshot-32K', desc: '32k context' },
-        { id: 'moonshot-v1-128k', label: 'Moonshot-128K', desc: '128k context' },
+      'Riset & Tugas Berat': [
+        { id: 'kimi-k2.5-agent', label: 'K2.5 Agent', desc: 'Riset, slide, dokumen, spreadsheet', starred: true, rec: 'Riset & Dokumen' },
+        { id: 'kimi-k2.5-agent-swarm', label: 'K2.5 Agent Swarm', desc: 'Tugas super kompleks, 100 sub-agent paralel', rec: 'Tugas Kompleks' },
       ],
-      'Vision': [
-        { id: 'moonshot-v1-8k-vision-preview', label: 'Vision-8K', desc: 'Image+text 8k' },
-        { id: 'moonshot-v1-32k-vision-preview', label: 'Vision-32K', desc: 'Image+text 32k' },
-        { id: 'moonshot-v1-128k-vision-preview', label: 'Vision-128K', desc: 'Image+text 128k' },
+      'Menulis & Konten Panjang': [
+        { id: 'moonshot-v1-32k', label: 'Moonshot-32K', desc: 'Artikel, essay, cerita sedang', rec: 'Menulis Artikel' },
+        { id: 'moonshot-v1-128k', label: 'Moonshot-128K', desc: 'Dokumen panjang, buku, laporan', rec: 'Dokumen Panjang' },
+        { id: 'kimi-k2-0711-preview', label: 'K2-0711', desc: '128k context, 1T params arsitektur MoE', rec: 'Konten Besar' },
       ],
-      'Latest': [
-        { id: 'kimi-latest', label: 'Kimi-Latest', desc: 'Latest model 128k' },
+      'Analisis Gambar (Vision)': [
+        { id: 'moonshot-v1-8k-vision-preview', label: 'Vision-8K', desc: 'Analisis gambar cepat & ringan', rec: 'Gambar Ringan' },
+        { id: 'moonshot-v1-32k-vision-preview', label: 'Vision-32K', desc: 'Analisis gambar + teks sedang', rec: 'Gambar + Teks' },
+        { id: 'moonshot-v1-128k-vision-preview', label: 'Vision-128K', desc: 'Analisis gambar + dokumen panjang', rec: 'Gambar + Dokumen' },
+      ],
+      'Serba Guna': [
+        { id: 'kimi-latest', label: 'Kimi-Latest', desc: 'Model terbaru, vision + chat, 128k', starred: true, rec: 'Serba Guna' },
       ]
     };
 
@@ -968,7 +970,7 @@
       for (const [g, ms] of Object.entries(MODELS_DATA)) {
         h += '<optgroup label="'+g+'">';
         for (const m of ms) {
-          h += '<option value="'+m.id+'">'+m.label+(m.starred?' \u2B50':'')+' \u2014 '+m.desc+'</option>';
+          h += '<option value="'+m.id+'">'+m.label+(m.starred?' \u2B50':'')+(m.rec?' ['+m.rec+']':'')+' \u2014 '+m.desc+'</option>';
         }
         h += '</optgroup>';
       }
@@ -1331,7 +1333,7 @@
         for (const m of ms) {
           const opt = document.createElement('option');
           opt.value = m.id;
-          opt.textContent = m.label + (m.starred ? ' \u2B50' : '') + ' \u2014 ' + m.desc;
+          opt.textContent = m.label + (m.starred ? ' \u2B50' : '') + (m.rec ? ' [' + m.rec + ']' : '') + ' \u2014 ' + m.desc;
           og.appendChild(opt);
         }
         sel.appendChild(og);
