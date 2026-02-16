@@ -203,6 +203,8 @@ Jika ingin membuat website chat AI dengan streaming:
 - Port: 5000
 
 ## Recent Changes
+- 2026-02-16: FIX frontend chat tidak melanjutkan percakapan - sekarang conversation_id di-track dan dikirim otomatis
+- 2026-02-16: Gemini adapter sekarang support conversation_id passthrough
 - 2026-02-16: FIX conversation continuation - chat sekarang bisa dilanjutkan via chatId
 - 2026-02-16: FIX true streaming - response sekarang per-kata (bukan buffered sekaligus)
 - 2026-02-16: Connect RPC client chatStream() method dengan responseType: 'stream'
