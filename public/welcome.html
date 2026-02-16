@@ -6,232 +6,351 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
-  <title>Kimi Free API Explorer</title>
+  <title>SANSEKAI API Documentation</title>
   <style>
     :root {
-      --bg: #f5f7fa;
+      --bg: #fafafa;
       --surface: #ffffff;
-      --text: #1a1d23;
-      --muted: #5a6270;
-      --subtle: #7c8490;
-      --border: #d4d9e0;
-      --border-light: #e8ecf2;
-      --primary: #667eea;
-      --primary-2: #764ba2;
-      --accent: #0969da;
-      --success: #1a7f37;
-      --success-bg: #dafbe1;
-      --warning: #cf222e;
-      --warning-bg: #ffebe9;
-      --get-color: #1a7f37;
-      --get-bg: #dafbe1;
-      --get-border: #aceebb;
-      --post-color: #0550ae;
-      --post-bg: #ddf4ff;
-      --post-border: #80ccff;
-      --radius: 10px;
-      --shadow: 0 1px 3px rgba(27,31,36,0.06), 0 1px 2px rgba(27,31,36,0.04);
-      --shadow-md: 0 4px 16px rgba(27,31,36,0.1);
-      --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
-      --star: #f59e0b;
+      --text: #3b4151;
+      --muted: #6b7280;
+      --border: #e2e8f0;
+      --border-light: #f1f5f9;
+      --primary: #4990e2;
+      --primary-dark: #3b7dd8;
+      --success: #49cc90;
+      --success-dark: #3bb378;
+      --success-bg: #e8f5e9;
+      --warning: #f93e3e;
+      --warning-bg: #fce4ec;
+      --info: #61affe;
+      --info-bg: #e3f2fd;
+      --get-color: #61affe;
+      --get-bg: #ebf3fb;
+      --get-border: #61affe;
+      --post-color: #49cc90;
+      --post-bg: #e8f6f0;
+      --post-border: #49cc90;
+      --radius: 4px;
+      --shadow: 0 1px 2px rgba(0,0,0,0.05);
+      --font-mono: 'Source Code Pro', 'SF Mono', Monaco, 'Cascadia Code', Consolas, monospace;
+      --font-sans: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
     *, *::before, *::after { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
-    body { margin: 0; font-family: var(--font-sans); color: var(--text); background: var(--bg); line-height: 1.6; }
-    .container { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+    body { margin: 0; font-family: var(--font-sans); color: var(--text); background: var(--bg); line-height: 1.6; font-size: 14px; }
 
-    header {
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      color: #fff;
-      padding: 28px 0 24px;
+    .topbar {
+      background: #1b1b1b;
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
-    header h1 { margin: 0 0 4px; font-size: 26px; font-weight: 800; }
-    header p { margin: 0; opacity: 0.88; font-size: 14px; }
-    .base-url-box {
-      margin-top: 14px;
-      background: rgba(255,255,255,0.14);
-      border: 1px solid rgba(255,255,255,0.22);
-      border-radius: 8px;
-      padding: 9px 14px;
-      font-family: var(--font-mono);
+    .topbar img { height: 28px; }
+    .topbar span { color: #fff; font-size: 14px; font-weight: 600; }
+
+    .info-section {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 0;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+    .api-title { font-size: 28px; font-weight: 700; margin: 0 0 4px; color: var(--text); }
+    .api-badges { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+    .badge { display: inline-flex; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 700; }
+    .badge-version { background: #7d8492; color: #fff; }
+    .badge-oas { background: #49cc90; color: #fff; }
+    .api-desc { color: var(--muted); font-size: 14px; margin: 0 0 16px; }
+
+    .servers-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 6px;
+    }
+    .servers-label { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .servers-select {
+      width: 100%;
+      max-width: 500px;
+      padding: 8px 12px;
+      border: 2px solid var(--primary);
+      border-radius: var(--radius);
       font-size: 13px;
-      display: flex; align-items: center; gap: 10px;
-      backdrop-filter: blur(4px);
-    }
-    .base-url-box .label { font-weight: 700; opacity: 0.7; font-family: var(--font-sans); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .base-url-box .url { font-weight: 600; word-break: break-all; }
-
-    .section { margin: 20px 0; }
-    .section-title {
-      font-size: 17px; font-weight: 700; margin: 0 0 10px;
-      padding-bottom: 7px; border-bottom: 2px solid var(--border);
-      display: flex; align-items: center; gap: 8px;
+      font-weight: 600;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+      cursor: pointer;
     }
 
-    .card {
-      background: var(--surface);
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px;
-      box-shadow: var(--shadow);
-    }
-    .card label { display: block; font-weight: 600; font-size: 12px; margin-bottom: 5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; }
-    .card textarea, .card input[type="text"], .card select {
-      width: 100%; border: 1px solid var(--border); border-radius: 6px;
-      padding: 9px 10px; font-size: 13px; outline: none; transition: border-color 0.15s;
-    }
-    .card textarea { font-family: var(--font-mono); font-size: 12px; min-height: 70px; resize: vertical; }
-    .card textarea:focus, .card input:focus, .card select:focus { border-color: var(--primary); }
-
-    .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px;
-      background: var(--surface); color: var(--text); font-size: 13px; font-weight: 600;
-      cursor: pointer; transition: all 0.15s;
-    }
-    .btn:hover { background: var(--bg); border-color: #b0b8c2; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; border: none; }
-    .btn-primary:hover { opacity: 0.9; }
-    .btn-danger { background: var(--warning); color: #fff; border: none; }
-    .btn-danger:hover { opacity: 0.9; }
-    .btn-sm { padding: 5px 12px; font-size: 12px; }
-
-    .token-info {
-      margin-top: 10px; padding: 10px 12px; background: #f6f8fa;
-      border: 1px solid var(--border-light); border-radius: 6px; font-size: 12px; display: none;
-    }
-    .token-info.visible { display: block; }
-    .token-status {
-      display: inline-flex; align-items: center; gap: 4px;
-      padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;
-    }
-    .token-valid { background: var(--success-bg); color: var(--success); }
-    .token-expired { background: var(--warning-bg); color: var(--warning); }
-    .token-unknown { background: #f6f8fa; color: var(--muted); }
-
-    .chat-box {
+      border-radius: 3px;
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-md);
-      overflow: hidden;
+      color: var(--muted);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: var(--font-sans);
     }
-    .chat-header {
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      color: #fff; padding: 14px 18px;
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    }
-    .chat-header h3 { margin: 0; font-size: 16px; font-weight: 700; }
-    .chat-header select {
-      background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
-      color: #fff; border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 600;
-      outline: none; cursor: pointer; max-width: 240px;
-    }
-    .chat-header select option { color: #1a1d23; background: #fff; }
-    .chat-messages {
-      min-height: 180px; max-height: 420px; overflow-y: auto;
-      padding: 16px 18px; background: #fafbfd;
-    }
-    .chat-msg {
-      margin-bottom: 12px; display: flex; gap: 10px;
-    }
-    .chat-msg.user { justify-content: flex-end; }
-    .chat-msg .bubble {
-      max-width: 80%; padding: 10px 14px; border-radius: 14px;
-      font-size: 14px; line-height: 1.55; word-break: break-word; white-space: pre-wrap;
-    }
-    .chat-msg.user .bubble {
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      color: #fff; border-bottom-right-radius: 4px;
-    }
-    .chat-msg.assistant .bubble {
-      background: #fff; border: 1px solid var(--border-light);
-      color: var(--text); border-bottom-left-radius: 4px;
-    }
-    .chat-msg.system .bubble {
-      background: var(--warning-bg); color: var(--warning);
-      font-size: 12px; border-radius: 8px;
-    }
-    .chat-input-area {
-      border-top: 1px solid var(--border-light);
-      padding: 12px 16px; display: flex; gap: 10px; align-items: flex-end;
-    }
-    .chat-input-area textarea {
-      flex: 1; border: 1px solid var(--border); border-radius: 8px;
-      padding: 10px 12px; font-size: 14px; outline: none; resize: none;
-      min-height: 42px; max-height: 120px; font-family: var(--font-sans); line-height: 1.4;
-    }
-    .chat-input-area textarea:focus { border-color: var(--primary); }
-    .chat-send-btn {
-      height: 42px; min-width: 42px; border: none; border-radius: 8px;
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-      transition: opacity 0.15s;
-    }
-    .chat-send-btn:hover { opacity: 0.85; }
-    .chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .copy-btn:hover { background: #f1f5f9; border-color: #94a3b8; color: var(--text); }
+    .copy-btn.copied { background: var(--success-bg); color: var(--success-dark); border-color: var(--success); }
 
-    .typing-indicator { display: inline-flex; gap: 4px; padding: 6px 0; }
-    .typing-indicator span {
-      width: 7px; height: 7px; background: var(--muted); border-radius: 50%;
-      animation: bounce 1.2s infinite; opacity: 0.4;
+    .section-group { margin: 24px 0; }
+    .section-group-title {
+      font-size: 18px;
+      font-weight: 700;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
     }
-    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes bounce {
-      0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
-      40% { transform: translateY(-6px); opacity: 1; }
-    }
-
-    .model-star { color: var(--star); font-size: 13px; margin-left: 2px; }
+    .section-group-title .toggle-icon { font-size: 14px; color: var(--muted); transition: transform 0.2s; }
+    .section-group.collapsed .toggle-icon { transform: rotate(-90deg); }
+    .section-group.collapsed .section-group-content { display: none; }
 
     .endpoint-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); margin-bottom: 8px; box-shadow: var(--shadow); overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin: 4px 0;
+      overflow: hidden;
+      box-shadow: var(--shadow);
     }
+    .endpoint-card.method-get-card { border-color: rgba(97,175,254,0.3); }
+    .endpoint-card.method-post-card { border-color: rgba(73,204,144,0.3); }
+    .endpoint-card.open.method-get-card { border-color: var(--get-border); }
+    .endpoint-card.open.method-post-card { border-color: var(--post-border); }
+
     .endpoint-header {
-      display: flex; align-items: center; gap: 10px;
-      padding: 11px 14px; cursor: pointer; user-select: none; transition: background 0.1s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.1s;
     }
-    .endpoint-header:hover { background: #f6f8fa; }
+    .method-get-card .endpoint-header { background: var(--get-bg); }
+    .method-post-card .endpoint-header { background: var(--post-bg); }
+    .method-get-card.open .endpoint-header { background: var(--get-color); }
+    .method-post-card.open .endpoint-header { background: var(--post-color); }
+    .endpoint-card.open .endpoint-header .endpoint-path,
+    .endpoint-card.open .endpoint-header .endpoint-desc,
+    .endpoint-card.open .endpoint-header .endpoint-toggle { color: #fff; }
+
     .method-badge {
-      display: inline-flex; align-items: center; justify-content: center;
-      min-width: 52px; padding: 3px 8px; border-radius: 4px;
-      font-size: 11px; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase; flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 52px;
+      padding: 4px 0;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      color: #fff;
     }
-    .method-get { background: var(--get-bg); color: var(--get-color); border: 1px solid var(--get-border); }
-    .method-post { background: var(--post-bg); color: var(--post-color); border: 1px solid var(--post-border); }
-    .endpoint-path { font-family: var(--font-mono); font-size: 13px; font-weight: 600; flex: 1; }
-    .endpoint-desc { font-size: 12px; color: var(--muted); margin-left: auto; text-align: right; white-space: nowrap; }
-    .endpoint-toggle { font-size: 16px; color: var(--muted); transition: transform 0.2s; flex-shrink: 0; }
+    .method-get { background: var(--get-color); }
+    .method-post { background: var(--post-color); }
+
+    .endpoint-path { font-family: var(--font-mono); font-size: 14px; font-weight: 600; flex: 1; color: var(--text); }
+    .endpoint-desc { font-size: 13px; color: var(--muted); margin-left: auto; text-align: right; white-space: nowrap; }
+    .endpoint-toggle { font-size: 14px; color: var(--muted); transition: transform 0.2s; flex-shrink: 0; }
     .endpoint-card.open .endpoint-toggle { transform: rotate(180deg); }
-    .endpoint-body { display: none; border-top: 1px solid var(--border-light); padding: 14px; }
+
+    .endpoint-body { display: none; border-top: 1px solid var(--border); background: #fff; }
     .endpoint-card.open .endpoint-body { display: block; }
 
-    .form-group { margin-bottom: 10px; }
-    .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.3px; }
-    .form-group input, .form-group select, .form-group textarea {
-      width: 100%; border: 1px solid var(--border); border-radius: 6px;
-      padding: 7px 10px; font-size: 12px; outline: none; font-family: var(--font-mono);
-    }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); }
-    .form-group select { font-family: var(--font-sans); }
-    .form-group textarea { min-height: 100px; resize: vertical; }
-    .form-row { display: flex; gap: 10px; }
-    .form-row .form-group { flex: 1; }
+    .ep-description { padding: 14px 16px; font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--border-light); }
 
-    .response-area { margin-top: 12px; display: none; }
-    .response-area.visible { display: block; }
-    .response-header { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 12px; font-weight: 700; }
-    .status-code { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; font-family: var(--font-mono); }
-    .status-2xx { background: var(--success-bg); color: var(--success); }
-    .status-4xx, .status-5xx { background: var(--warning-bg); color: var(--warning); }
+    .params-section { padding: 16px; }
+    .params-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .params-cancel { color: var(--warning); font-weight: 600; font-size: 12px; cursor: pointer; border: none; background: none; padding: 0; }
+    .params-cancel:hover { text-decoration: underline; }
+
+    .param-table { width: 100%; border-collapse: collapse; }
+    .param-table th { text-align: left; font-size: 12px; font-weight: 700; color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--border); }
+    .param-table td { padding: 8px 10px; border-bottom: 1px solid var(--border-light); vertical-align: top; }
+    .param-name { font-family: var(--font-mono); font-size: 13px; font-weight: 600; }
+    .param-type { font-size: 11px; color: var(--muted); }
+    .param-loc { font-size: 10px; color: var(--muted); font-style: italic; }
+    .param-desc { font-size: 13px; color: var(--text); }
+    .param-input {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      font-size: 13px;
+      font-family: var(--font-mono);
+      outline: none;
+    }
+    .param-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(73,144,226,0.15); }
+
+    .body-editor {
+      margin: 0 16px 12px;
+    }
+    .body-editor label { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px; display: block; }
+    .body-editor textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.5;
+      resize: vertical;
+      outline: none;
+      background: #fff;
+    }
+    .body-editor textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(73,144,226,0.15); }
+
+    .model-select-group { margin: 0 16px 12px; }
+    .model-select-group label { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px; display: block; }
+    .model-select-group select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      font-size: 13px;
+      outline: none;
+      background: #fff;
+    }
+
+    .execute-bar {
+      padding: 12px 16px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      border-top: 1px solid var(--border-light);
+    }
+    .btn-execute {
+      padding: 8px 28px;
+      border: none;
+      border-radius: 3px;
+      background: #4990e2;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .btn-execute:hover { background: var(--primary-dark); }
+    .btn-execute:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-clear {
+      padding: 8px 20px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      background: #fff;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-clear:hover { background: #f1f5f9; }
+
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(0,0,0,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .response-section { border-top: 1px solid var(--border); }
+    .response-section-title { padding: 12px 16px; font-size: 13px; font-weight: 700; color: var(--text); background: #f8f9fa; border-bottom: 1px solid var(--border-light); }
+
+    .curl-section {
+      margin: 0 16px 12px;
+      padding: 12px;
+      background: #1e1e2e;
+      border-radius: 4px;
+      position: relative;
+    }
+    .curl-label { font-size: 12px; font-weight: 700; color: #89b4fa; margin-bottom: 6px; }
+    .curl-content {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #cdd6f4;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .curl-copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 4px 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 3px;
+      background: rgba(255,255,255,0.1);
+      color: #cdd6f4;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      transition: all 0.15s;
+    }
+    .curl-copy-btn:hover { background: rgba(255,255,255,0.2); }
+    .curl-copy-btn.copied { background: rgba(73,204,144,0.3); color: #49cc90; }
+
+    .request-url-section {
+      margin: 0 16px 12px;
+      padding: 10px 14px;
+      background: #f8f9fa;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text);
+      word-break: break-all;
+    }
+    .request-url-label { font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+
+    .server-response {
+      padding: 12px 16px 4px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .response-row { display: flex; align-items: flex-start; gap: 16px; padding: 8px 16px; }
+    .response-code { font-size: 14px; font-weight: 700; font-family: var(--font-mono); min-width: 40px; }
+    .response-code.code-2xx { color: var(--success-dark); }
+    .response-code.code-4xx, .response-code.code-5xx { color: var(--warning); }
+
+    .response-details { flex: 1; }
+    .response-body-wrapper { margin: 0 16px 16px; }
+    .response-body-label { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
     .response-body {
-      background: #1e1e2e; color: #cdd6f4; border-radius: 6px;
-      padding: 12px; font-family: var(--font-mono); font-size: 11px; line-height: 1.5;
-      overflow-x: auto; max-height: 400px; overflow-y: auto; white-space: pre-wrap; word-break: break-word;
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 4px;
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.5;
+      overflow-x: auto;
+      max-height: 500px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      position: relative;
     }
     .response-body .json-key { color: #89b4fa; }
     .response-body .json-string { color: #a6e3a1; }
@@ -239,104 +358,177 @@
     .response-body .json-bool { color: #cba6f7; }
     .response-body .json-null { color: #6c7086; }
 
-    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(0,0,0,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.6s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .disclaimer {
-      margin: 16px 0; padding: 12px 14px;
-      border: 1px solid #fad1d6; border-left: 4px solid var(--warning);
-      background: #fff7f7; border-radius: var(--radius); font-size: 12px; color: #6b1a20;
+    .download-btn {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      padding: 4px 10px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 3px;
+      background: rgba(73,144,226,0.3);
+      color: #89b4fa;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      transition: all 0.15s;
     }
-    .disclaimer strong { color: #8b1c24; }
+    .download-btn:hover { background: rgba(73,144,226,0.5); }
 
-    footer { text-align: center; padding: 20px 0; color: var(--subtle); font-size: 12px; border-top: 1px solid var(--border-light); margin-top: 20px; }
+    .response-headers-section { margin: 0 16px 16px; }
+    .response-headers-toggle {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      cursor: pointer;
+      border: none;
+      background: none;
+      padding: 0;
+    }
+    .response-headers-toggle:hover { text-decoration: underline; }
+    .response-headers-content {
+      display: none;
+      margin-top: 6px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .response-headers-content.visible { display: block; }
+
+    .auth-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .auth-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .auth-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      outline: none;
+    }
+    .auth-input:focus { border-color: var(--primary); }
+    .auth-btns { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+    .auth-btn {
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .auth-btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .auth-btn-primary:hover { background: var(--primary-dark); }
+    .auth-btn-danger { background: var(--warning); color: #fff; border-color: var(--warning); }
+    .auth-btn-danger:hover { opacity: 0.85; }
+    .auth-btn-default { background: #fff; color: var(--text); }
+    .auth-btn-default:hover { background: #f1f5f9; }
+    .auth-status {
+      margin-top: 8px;
+      padding: 8px 12px;
+      border-radius: 3px;
+      font-size: 12px;
+      display: none;
+    }
+    .auth-status.visible { display: block; }
+    .auth-status.success { background: var(--success-bg); color: var(--success-dark); border: 1px solid var(--success); }
+    .auth-status.error { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning); }
+    .auth-status.info { background: var(--info-bg); color: var(--primary); border: 1px solid var(--primary); }
+
+    footer { text-align: center; padding: 20px 0; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); margin-top: 24px; }
 
     @media (max-width: 640px) {
-      header h1 { font-size: 20px; }
+      .api-title { font-size: 22px; }
       .endpoint-desc { display: none; }
       .container { padding: 0 12px; }
-      .chat-header { flex-direction: column; align-items: flex-start; }
-      .chat-header select { max-width: 100%; }
-      .form-row { flex-direction: column; }
+      .servers-select { max-width: 100%; }
+      .response-row { flex-direction: column; gap: 4px; }
     }
   </style>
 </head>
 <body>
 
-  <header>
+  <div class="topbar">
+    <span>SANSEKAI API Documentation</span>
+  </div>
+
+  <div class="info-section">
     <div class="container">
-      <h1>Kimi Free API Explorer</h1>
-      <p>Interactive API documentation & testing. Compatible with OpenAI, Claude, and Gemini formats.</p>
-      <div class="base-url-box">
-        <span class="label">Base URL</span>
-        <span class="url" id="baseUrl">Loading...</span>
+      <h1 class="api-title">SANSEKAI API Documentation</h1>
+      <div class="api-badges">
+        <span class="badge badge-version">1.0.2</span>
+        <span class="badge badge-oas">OAS 3.0</span>
+      </div>
+      <p class="api-desc">
+        Selamat datang di dokumentasi Sansekai API.<br>
+        Proxy server Kimi AI yang kompatibel dengan format OpenAI, Gemini, dan Claude.
+      </p>
+      <div class="servers-box">
+        <div class="servers-label">Servers</div>
+        <select class="servers-select" id="serverSelect" onchange="updateBaseUrl()">
+        </select>
       </div>
     </div>
-  </header>
+  </div>
 
-  <main class="container">
-    <div class="disclaimer">
-      <strong>Disclaimer:</strong> API reverse-engineer bersifat tidak stabil. Disarankan menggunakan API resmi berbayar untuk produksi. Project ini hanya untuk riset dan pembelajaran, dilarang untuk komersial.
+  <main class="container" style="padding-top: 20px;">
+
+    <div class="auth-section">
+      <div class="auth-title">&#128274; Authorize (Kimi Auth Token)</div>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 8px;">Paste cookie string atau kimi-auth JWT token. Token akan disimpan di server dan digunakan otomatis untuk semua API calls.</p>
+      <input type="text" class="auth-input" id="authInput" placeholder="eyJhbGciOiJIUzI1... atau _ga=...; kimi-auth=eyJ..."/>
+      <div class="auth-btns">
+        <button class="auth-btn auth-btn-primary" onclick="saveToken()">Save ke Server</button>
+        <button class="auth-btn auth-btn-default" onclick="checkStatus()">Cek Status</button>
+        <button class="auth-btn auth-btn-danger" onclick="clearToken()">Hapus Token</button>
+      </div>
+      <div class="auth-status" id="authStatus"></div>
     </div>
 
-    <section class="section" id="auth-section">
-      <div class="section-title">&#128274; Kimi Auth Token</div>
-      <div class="card">
-        <label>Paste full cookie string atau kimi-auth JWT token</label>
-        <textarea id="cookieInput" placeholder="Paste cookies: _ga=...; kimi-auth=eyJhbGci...&#10;Atau langsung JWT token: eyJhbGci..."
-          style="min-height:60px;"></textarea>
-        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
-          <button class="btn btn-primary btn-sm" onclick="saveTokenToServer()">Save ke Server</button>
-          <button class="btn btn-sm" onclick="loadServerStatus()">Cek Status Token</button>
-          <button class="btn btn-danger btn-sm" onclick="clearServerToken()">Hapus Token</button>
-        </div>
-        <div class="token-info" id="tokenInfo">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <strong>Status:</strong>
-            <span class="token-status" id="tokenStatus"></span>
-          </div>
-          <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:4px;word-break:break-all;" id="tokenPreview"></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="chat-section">
-      <div class="section-title">&#128172; Chat Test</div>
-      <div class="chat-box">
-        <div class="chat-header">
-          <h3>Chat AI</h3>
-          <select id="chatModel"></select>
-        </div>
-        <div class="chat-messages" id="chatMessages">
-          <div class="chat-msg system"><div class="bubble">Pilih model dan tulis pesan untuk mulai chat. Token harus disimpan dulu di bagian Auth di atas.</div></div>
-        </div>
-        <div class="chat-input-area">
-          <textarea id="chatInput" placeholder="Tulis pesan di sini..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"></textarea>
-          <button class="chat-send-btn" id="chatSendBtn" onclick="sendChat()" title="Kirim">&#9654;</button>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="api-section">
-      <div class="section-title">&#128640; API Endpoints</div>
-      <div id="endpointList"></div>
-    </section>
+    <div id="endpointGroups"></div>
   </main>
 
   <footer>
-    <div class="container">Kimi Free API Explorer &mdash; 16 Model AI (K2.5, K2, Moonshot, Vision)</div>
+    <div class="container">SANSEKAI API Documentation &mdash; 16 Model AI (K2.5, K2, Moonshot, Vision) &mdash; Kimi Free API</div>
   </footer>
 
   <script>
-    const BASE_URL = window.location.origin;
-    document.getElementById('baseUrl').textContent = BASE_URL;
+    let BASE_URL = window.location.origin;
 
-    const STARRED_MODELS = ['kimi-k2.5-thinking', 'kimi-k2.5-agent', 'kimi-k2-0905-preview', 'kimi-k2-thinking'];
+    const SERVERS = [
+      { url: window.location.origin, label: window.location.origin + ' - Current Server' }
+    ];
+
+    function updateBaseUrl() {
+      const sel = document.getElementById('serverSelect');
+      BASE_URL = sel.value;
+    }
+
+    function initServers() {
+      const sel = document.getElementById('serverSelect');
+      sel.innerHTML = '';
+      SERVERS.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.url;
+        opt.textContent = s.url + ' - ' + s.label.split(' - ')[1];
+        sel.appendChild(opt);
+      });
+    }
 
     const MODELS_DATA = {
       'K2.5 Series (Terbaru)': [
         { id: 'kimi-k2.5-instant', label: 'K2.5 Instant', desc: 'Quick response, 3-8s' },
-        { id: 'kimi-k2.5-thinking', label: 'K2.5 Thinking', desc: 'Deep thinking, complex questions', starred: true },
+        { id: 'kimi-k2.5-thinking', label: 'K2.5 Thinking', desc: 'Deep thinking', starred: true },
         { id: 'kimi-k2.5-agent', label: 'K2.5 Agent', desc: 'Research, slides, docs', starred: true },
         { id: 'kimi-k2.5-agent-swarm', label: 'K2.5 Agent Swarm', desc: '100 parallel sub-agents' },
       ],
@@ -362,206 +554,125 @@
       ]
     };
 
-    function buildModelOptions(selectId) {
-      const sel = document.getElementById(selectId);
-      if (!sel) return;
-      sel.innerHTML = '';
-      for (const [group, models] of Object.entries(MODELS_DATA)) {
-        const og = document.createElement('optgroup');
-        og.label = group;
-        for (const m of models) {
-          const opt = document.createElement('option');
-          opt.value = m.id;
-          opt.textContent = m.label + (m.starred ? ' \u2B50' : '') + ' \u2014 ' + m.desc;
-          og.appendChild(opt);
-        }
-        sel.appendChild(og);
-      }
-    }
-
-    function decodeJWT(token) {
-      try {
-        const parts = token.split('.');
-        if (parts.length !== 3) return null;
-        return JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-      } catch { return null; }
-    }
-
-    function showTokenStatus(info, isServer) {
-      const el = document.getElementById('tokenInfo');
-      const st = document.getElementById('tokenStatus');
-      const pr = document.getElementById('tokenPreview');
-      el.classList.add('visible');
-
-      if (info.has_token === false) {
-        st.className = 'token-status token-unknown';
-        st.textContent = 'Belum ada token di server';
-        pr.textContent = '';
-        return;
-      }
-
-      const ti = info.token_info || info;
-      if (ti.is_expired === false) {
-        st.className = 'token-status token-valid';
-        st.textContent = '\u2713 Valid \u2014 Expires: ' + new Date(ti.expires_at).toLocaleString();
-      } else if (ti.is_expired === true) {
-        st.className = 'token-status token-expired';
-        st.textContent = '\u2717 Expired: ' + new Date(ti.expires_at).toLocaleString();
-      } else {
-        st.className = 'token-status token-unknown';
-        st.textContent = 'Status tidak diketahui';
-      }
-      pr.textContent = info.token_preview || (ti.user_id ? 'User: ' + ti.user_id + ' | Region: ' + (ti.region || '-') + ' | Level: ' + (ti.membership_level || '-') : '');
-    }
-
-    async function saveTokenToServer() {
-      const input = document.getElementById('cookieInput').value.trim();
-      if (!input) { alert('Paste cookie string atau JWT token dulu.'); return; }
-      try {
-        const res = await fetch(BASE_URL + '/auth/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ cookies: input })
-        });
-        const data = await res.json();
-        if (data.success) {
-          showTokenStatus(data, true);
-          alert('Token berhasil disimpan ke server! Semua API call akan otomatis pakai token ini.');
-        } else {
-          alert('Gagal: ' + (data.error || 'Unknown error'));
-          if (data.token_info) showTokenStatus({ token_info: data.token_info }, true);
-        }
-      } catch (e) { alert('Error: ' + e.message); }
-    }
-
-    async function loadServerStatus() {
-      try {
-        const res = await fetch(BASE_URL + '/auth/status');
-        const data = await res.json();
-        showTokenStatus(data, true);
-      } catch (e) { alert('Error: ' + e.message); }
-    }
-
-    async function clearServerToken() {
-      try {
-        await fetch(BASE_URL + '/auth/clear');
-        document.getElementById('tokenInfo').classList.remove('visible');
-        document.getElementById('cookieInput').value = '';
-        alert('Token di server berhasil dihapus.');
-      } catch (e) { alert('Error: ' + e.message); }
-    }
-
-    let chatBusy = false;
-
-    function addChatMessage(role, content) {
-      const container = document.getElementById('chatMessages');
-      const div = document.createElement('div');
-      div.className = 'chat-msg ' + role;
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble';
-      bubble.textContent = content;
-      div.appendChild(bubble);
-      container.appendChild(div);
-      container.scrollTop = container.scrollHeight;
-      return bubble;
-    }
-
-    function addTypingIndicator() {
-      const container = document.getElementById('chatMessages');
-      const div = document.createElement('div');
-      div.className = 'chat-msg assistant';
-      div.id = 'typingIndicator';
-      div.innerHTML = '<div class="bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
-      container.appendChild(div);
-      container.scrollTop = container.scrollHeight;
-    }
-
-    function removeTypingIndicator() {
-      const el = document.getElementById('typingIndicator');
-      if (el) el.remove();
-    }
-
-    async function sendChat() {
-      if (chatBusy) return;
-      const input = document.getElementById('chatInput');
-      const msg = input.value.trim();
-      if (!msg) return;
-
-      const model = document.getElementById('chatModel').value;
-      input.value = '';
-      addChatMessage('user', msg);
-
-      chatBusy = true;
-      document.getElementById('chatSendBtn').disabled = true;
-      addTypingIndicator();
-
-      try {
-        const res = await fetch(BASE_URL + '/v1/chat/completions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: model,
-            messages: [{ role: 'user', content: msg }],
-            stream: false
-          })
-        });
-
-        removeTypingIndicator();
-
-        if (!res.ok) {
-          const err = await res.text();
-          let errMsg = 'Error ' + res.status;
-          try { const j = JSON.parse(err); errMsg = j.message || j.error || errMsg; } catch {}
-          addChatMessage('system', errMsg);
-        } else {
-          const data = await res.json();
-          const reply = data.choices?.[0]?.message?.content || data.choices?.[0]?.text || JSON.stringify(data);
-          addChatMessage('assistant', reply);
-        }
-      } catch (e) {
-        removeTypingIndicator();
-        addChatMessage('system', 'Request failed: ' + e.message);
-      }
-
-      chatBusy = false;
-      document.getElementById('chatSendBtn').disabled = false;
-    }
-
-    const ENDPOINTS = [
-      { method: 'GET', path: '/ping', desc: 'Health check', hasBody: false, hasModel: false, hasAuth: false },
-      { method: 'GET', path: '/v1/models', desc: 'Daftar 16 model AI', hasBody: false, hasModel: false, hasAuth: false },
-      { method: 'GET', path: '/v1beta/models', desc: 'Daftar model Gemini', hasBody: false, hasModel: false, hasAuth: false },
-      { method: 'GET', path: '/auth/status', desc: 'Status token di server', hasBody: false, hasModel: false, hasAuth: false },
+    const ENDPOINT_GROUPS = [
       {
-        method: 'POST', path: '/v1/messages', desc: 'Chat (Claude format)',
-        hasBody: true, hasModel: true, hasAuth: false,
-        defaultBody: { model: 'kimi-k2.5-instant', max_tokens: 1024, messages: [{ role: 'user', content: 'Hello' }], stream: false }
+        name: 'Health & Info',
+        endpoints: [
+          {
+            method: 'GET', path: '/ping', desc: 'Health Check',
+            description: 'Mengecek apakah server berjalan. Mengembalikan "pong".',
+            params: [], hasBody: false, hasModel: false
+          },
+          {
+            method: 'GET', path: '/v1/models', desc: 'Daftar Model AI (OpenAI Format)',
+            description: 'Mengambil daftar semua 16 model AI yang didukung dalam format OpenAI.',
+            params: [], hasBody: false, hasModel: false
+          },
+          {
+            method: 'GET', path: '/v1beta/models', desc: 'Daftar Model (Gemini Format)',
+            description: 'Mengambil daftar model dalam format Google Gemini.',
+            params: [], hasBody: false, hasModel: false
+          }
+        ]
       },
       {
-        method: 'POST', path: '/v1beta/models/:model:generateContent', desc: 'Generate (Gemini format)',
-        hasBody: true, hasModel: true, hasAuth: false, hasModelInPath: true,
-        defaultBody: { contents: [{ parts: [{ text: 'Hello' }] }] }
+        name: 'OpenAI Compatible',
+        endpoints: [
+          {
+            method: 'POST', path: '/v1/chat/completions', desc: 'Chat Completions',
+            description: 'Endpoint chat completion kompatibel dengan format OpenAI. Mendukung semua 16 model Kimi AI, streaming, dan multi-turn conversation.',
+            params: [],
+            hasBody: true, hasModel: true,
+            defaultBody: {
+              model: 'kimi-k2.5-instant',
+              messages: [{ role: 'user', content: 'Hello' }],
+              stream: false
+            }
+          }
+        ]
       },
       {
-        method: 'POST', path: '/token/check', desc: 'Cek validitas token',
-        hasBody: true, hasModel: false, hasAuth: false,
-        defaultBody: { token: '' }
+        name: 'Claude Compatible',
+        endpoints: [
+          {
+            method: 'POST', path: '/v1/messages', desc: 'Messages (Claude Format)',
+            description: 'Endpoint chat kompatibel dengan format Anthropic Claude. Mendukung streaming dan system prompts.',
+            params: [],
+            hasBody: true, hasModel: true,
+            defaultBody: {
+              model: 'kimi-k2.5-instant',
+              max_tokens: 1024,
+              messages: [{ role: 'user', content: 'Hello' }],
+              stream: false
+            }
+          }
+        ]
       },
       {
-        method: 'POST', path: '/auth/extract', desc: 'Extract kimi-auth dari cookies',
-        hasBody: true, hasModel: false, hasAuth: false,
-        defaultBody: { cookies: '_ga=...; kimi-auth=eyJ...' }
+        name: 'Gemini Compatible',
+        endpoints: [
+          {
+            method: 'POST', path: '/v1beta/models/:model:generateContent', desc: 'Generate Content',
+            description: 'Endpoint generate content kompatibel dengan format Google Gemini.',
+            params: [],
+            hasBody: true, hasModel: true, hasModelInPath: true,
+            defaultBody: {
+              contents: [{ parts: [{ text: 'Hello' }] }]
+            }
+          },
+          {
+            method: 'POST', path: '/v1beta/models/:model:streamGenerateContent', desc: 'Stream Generate Content',
+            description: 'Endpoint streaming generate content kompatibel dengan format Google Gemini.',
+            params: [],
+            hasBody: true, hasModel: true, hasModelInPath: true,
+            defaultBody: {
+              contents: [{ parts: [{ text: 'Hello' }] }]
+            }
+          }
+        ]
       },
       {
-        method: 'POST', path: '/auth/save', desc: 'Simpan token ke server',
-        hasBody: true, hasModel: false, hasAuth: false,
-        defaultBody: { cookies: 'paste_cookie_string_disini' }
+        name: 'Token Management',
+        endpoints: [
+          {
+            method: 'GET', path: '/auth/status', desc: 'Status Token Server',
+            description: 'Mengecek status token yang tersimpan di server (expiry, user info).',
+            params: [], hasBody: false, hasModel: false
+          },
+          {
+            method: 'POST', path: '/auth/save', desc: 'Simpan Token ke Server',
+            description: 'Menyimpan token ke server. Token akan digunakan otomatis untuk semua API calls.',
+            params: [],
+            hasBody: true, hasModel: false,
+            defaultBody: { cookies: 'paste_cookie_or_jwt_here' }
+          },
+          {
+            method: 'POST', path: '/auth/extract', desc: 'Extract kimi-auth dari Cookies',
+            description: 'Extract token kimi-auth dari cookie string.',
+            params: [],
+            hasBody: true, hasModel: false,
+            defaultBody: { cookies: '_ga=...; kimi-auth=eyJ...' }
+          },
+          {
+            method: 'GET', path: '/auth/clear', desc: 'Hapus Token Server',
+            description: 'Menghapus token yang tersimpan di server.',
+            params: [], hasBody: false, hasModel: false
+          },
+          {
+            method: 'POST', path: '/token/check', desc: 'Cek Validitas Token',
+            description: 'Mengecek apakah refresh_token masih valid.',
+            params: [],
+            hasBody: true, hasModel: false,
+            defaultBody: { token: '' }
+          }
+        ]
       }
     ];
 
     function syntaxHighlight(json) {
       if (typeof json !== 'string') json = JSON.stringify(json, null, 2);
-      return json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      return json
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/("(\\u[a-fA-F0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?)/g, function(match) {
           let cls = 'json-string';
           if (/:$/.test(match)) { cls = 'json-key'; return '<span class="'+cls+'">'+match.slice(0,-1)+'</span>:'; }
@@ -572,86 +683,350 @@
         .replace(/\b(-?\d+\.?\d*([eE][+-]?\d+)?)\b/g, '<span class="json-number">$1</span>');
     }
 
-    function buildModelSelect2(id) {
-      let h = '<select id="'+id+'">';
+    function buildModelSelect(id) {
+      let h = '<select id="'+id+'" class="param-input" style="font-family:var(--font-sans)">';
       for (const [g, ms] of Object.entries(MODELS_DATA)) {
         h += '<optgroup label="'+g+'">';
-        for (const m of ms) { h += '<option value="'+m.id+'">'+m.label+(m.starred?' \u2B50':'')+' - '+m.desc+'</option>'; }
+        for (const m of ms) {
+          h += '<option value="'+m.id+'">'+m.label+(m.starred?' \u2B50':'')+' \u2014 '+m.desc+'</option>';
+        }
         h += '</optgroup>';
       }
       h += '</select>';
       return h;
     }
 
-    function renderEndpoints() {
-      const c = document.getElementById('endpointList');
-      c.innerHTML = '';
-      ENDPOINTS.forEach((ep, i) => {
-        const card = document.createElement('div');
-        card.className = 'endpoint-card';
-        card.id = 'ep-'+i;
-        const mc = ep.method === 'GET' ? 'method-get' : 'method-post';
-        let body = '<div class="endpoint-body">';
-        if (ep.hasModel) {
-          body += '<div class="form-group"><label>Model</label>'+buildModelSelect2('model-'+i)+'</div>';
-        }
-        if (ep.hasBody) {
-          body += '<div class="form-group"><label>Request Body</label><textarea id="body-'+i+'">'+JSON.stringify(ep.defaultBody, null, 2)+'</textarea></div>';
-        }
-        body += '<div style="display:flex;gap:8px;align-items:center;margin-top:8px;">';
-        body += '<button class="btn btn-primary btn-sm" onclick="execEP('+i+')">&#9654; Execute</button>';
-        body += '<span id="loader-'+i+'" style="display:none"><span class="spinner"></span></span>';
-        body += '</div>';
-        body += '<div class="response-area" id="resp-'+i+'"><div class="response-header">Response <span class="status-code" id="st-'+i+'"></span></div><pre class="response-body" id="rb-'+i+'"></pre></div>';
-        body += '</div>';
-        card.innerHTML = '<div class="endpoint-header" onclick="toggleEP('+i+')"><span class="method-badge '+mc+'">'+ep.method+'</span><span class="endpoint-path">'+ep.path+'</span><span class="endpoint-desc">'+ep.desc+'</span><span class="endpoint-toggle">&#9660;</span></div>'+body;
-        c.appendChild(card);
+    function generateCurl(ep, bodyObj, url) {
+      let curl = "curl -X '"+ep.method+"' \\\n  '"+url+"'";
+      if (bodyObj) {
+        curl += " \\\n  -H 'Content-Type: application/json'";
+        curl += " \\\n  -d '"+JSON.stringify(bodyObj)+"'";
+      } else {
+        curl += " \\\n  -H 'accept: */*'";
+      }
+      return curl;
+    }
+
+    function copyToClipboard(text, btnEl) {
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = btnEl.textContent;
+        btnEl.textContent = 'Copied!';
+        btnEl.classList.add('copied');
+        setTimeout(() => { btnEl.textContent = orig; btnEl.classList.remove('copied'); }, 1500);
       });
     }
 
-    function toggleEP(i) { document.getElementById('ep-'+i).classList.toggle('open'); }
+    function downloadResponse(text, filename) {
+      const blob = new Blob([text], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename || 'response.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
 
-    async function execEP(i) {
-      const ep = ENDPOINTS[i];
+    let epCounter = 0;
+
+    function renderEndpoints() {
+      const container = document.getElementById('endpointGroups');
+      container.innerHTML = '';
+
+      ENDPOINT_GROUPS.forEach((group, gi) => {
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'section-group';
+        groupDiv.id = 'group-'+gi;
+
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'section-group-title';
+        titleDiv.innerHTML = '<span class="toggle-icon">&#9660;</span> '+group.name;
+        titleDiv.onclick = () => groupDiv.classList.toggle('collapsed');
+        groupDiv.appendChild(titleDiv);
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'section-group-content';
+
+        group.endpoints.forEach((ep) => {
+          const idx = epCounter++;
+          const card = document.createElement('div');
+          const methodClass = ep.method === 'GET' ? 'method-get-card' : 'method-post-card';
+          card.className = 'endpoint-card '+methodClass;
+          card.id = 'ep-'+idx;
+
+          let bodyHtml = '<div class="endpoint-body">';
+
+          if (ep.description) {
+            bodyHtml += '<div class="ep-description">'+ep.description+'</div>';
+          }
+
+          bodyHtml += '<div class="params-section">';
+          bodyHtml += '<div class="params-title"><span>Parameters</span><button class="params-cancel" onclick="clearEP('+idx+')">Cancel</button></div>';
+
+          if (ep.params && ep.params.length > 0) {
+            bodyHtml += '<table class="param-table"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody>';
+            ep.params.forEach((p, pi) => {
+              bodyHtml += '<tr><td><div class="param-name">'+p.name+'</div><div class="param-type">'+p.type+'</div><div class="param-loc">('+p.location+')</div></td>';
+              bodyHtml += '<td><div class="param-desc">'+p.desc+'</div><input type="text" class="param-input" id="param-'+idx+'-'+pi+'" placeholder="'+p.name+'"/></td></tr>';
+            });
+            bodyHtml += '</tbody></table>';
+          } else if (!ep.hasBody && !ep.hasModel) {
+            bodyHtml += '<p style="color:var(--muted);font-size:12px;margin:4px 0;">No parameters</p>';
+          }
+          bodyHtml += '</div>';
+
+          if (ep.hasModel) {
+            bodyHtml += '<div class="model-select-group"><label>Model</label>'+buildModelSelect('model-'+idx)+'</div>';
+          }
+
+          if (ep.hasBody) {
+            bodyHtml += '<div class="body-editor"><label>Request Body (application/json)</label><textarea id="body-'+idx+'">'+JSON.stringify(ep.defaultBody, null, 2)+'</textarea></div>';
+          }
+
+          bodyHtml += '<div class="execute-bar">';
+          bodyHtml += '<button class="btn-execute" onclick="executeEP('+idx+')" id="execBtn-'+idx+'">Execute</button>';
+          bodyHtml += '<button class="btn-clear" onclick="clearResponse('+idx+')">Clear</button>';
+          bodyHtml += '<span id="loader-'+idx+'" style="display:none;margin-left:8px;"><span class="spinner"></span></span>';
+          bodyHtml += '</div>';
+
+          bodyHtml += '<div class="response-section" id="respSection-'+idx+'" style="display:none;">';
+          bodyHtml += '<div class="response-section-title">Responses</div>';
+
+          bodyHtml += '<div id="curlArea-'+idx+'" style="display:none;"><div class="curl-section"><div class="curl-label">Curl</div><pre class="curl-content" id="curlContent-'+idx+'"></pre><button class="curl-copy-btn" id="curlCopyBtn-'+idx+'" onclick="copyCurl('+idx+')">Copy</button></div></div>';
+
+          bodyHtml += '<div id="reqUrlArea-'+idx+'" style="display:none;"><div class="request-url-section"><div class="request-url-label">Request URL</div><div id="reqUrl-'+idx+'"></div></div></div>';
+
+          bodyHtml += '<div class="server-response">Server response</div>';
+          bodyHtml += '<div class="response-row"><div class="response-code" id="respCode-'+idx+'"></div><div class="response-details"><div style="font-size:12px;color:var(--muted);" id="respCodeLabel-'+idx+'"></div></div></div>';
+
+          bodyHtml += '<div class="response-body-wrapper"><div class="response-body-label">Response body</div><div style="position:relative;"><pre class="response-body" id="respBody-'+idx+'"></pre><button class="download-btn" id="dlBtn-'+idx+'" onclick="downloadResp('+idx+')" style="display:none;">Download</button></div></div>';
+
+          bodyHtml += '<div class="response-headers-section"><button class="response-headers-toggle" onclick="toggleHeaders('+idx+')">Response headers</button><div class="response-headers-content" id="respHeaders-'+idx+'"></div></div>';
+
+          bodyHtml += '</div>';
+          bodyHtml += '</div>';
+
+          card.innerHTML = '<div class="endpoint-header" onclick="toggleEP('+idx+')"><span class="method-badge method-'+ep.method.toLowerCase()+'">'+ep.method+'</span><span class="endpoint-path">'+ep.path+'</span><span class="endpoint-desc">'+ep.desc+'</span><span class="endpoint-toggle">&#9660;</span></div>'+bodyHtml;
+
+          card.dataset.epIndex = idx;
+          contentDiv.appendChild(card);
+        });
+
+        groupDiv.appendChild(contentDiv);
+        container.appendChild(groupDiv);
+      });
+    }
+
+    function toggleEP(i) {
+      document.getElementById('ep-'+i).classList.toggle('open');
+    }
+
+    function clearEP(i) {
+      const bodyEl = document.getElementById('body-'+i);
+      if (bodyEl) {
+        const flatIdx = findEPByIndex(i);
+        if (flatIdx) bodyEl.value = JSON.stringify(flatIdx.defaultBody, null, 2);
+      }
+    }
+
+    function clearResponse(i) {
+      document.getElementById('respSection-'+i).style.display = 'none';
+    }
+
+    function findEPByIndex(idx) {
+      let counter = 0;
+      for (const g of ENDPOINT_GROUPS) {
+        for (const ep of g.endpoints) {
+          if (counter === idx) return ep;
+          counter++;
+        }
+      }
+      return null;
+    }
+
+    async function executeEP(i) {
+      const ep = findEPByIndex(i);
+      if (!ep) return;
+
       const loader = document.getElementById('loader-'+i);
-      const ra = document.getElementById('resp-'+i);
-      const st = document.getElementById('st-'+i);
-      const rb = document.getElementById('rb-'+i);
+      const execBtn = document.getElementById('execBtn-'+i);
+      const respSection = document.getElementById('respSection-'+i);
+      const curlArea = document.getElementById('curlArea-'+i);
+      const curlContent = document.getElementById('curlContent-'+i);
+      const reqUrlArea = document.getElementById('reqUrlArea-'+i);
+      const reqUrl = document.getElementById('reqUrl-'+i);
+      const respCode = document.getElementById('respCode-'+i);
+      const respCodeLabel = document.getElementById('respCodeLabel-'+i);
+      const respBody = document.getElementById('respBody-'+i);
+      const dlBtn = document.getElementById('dlBtn-'+i);
+      const respHeaders = document.getElementById('respHeaders-'+i);
+
       loader.style.display = 'inline-block';
-      ra.classList.remove('visible');
+      execBtn.disabled = true;
+
       let url = BASE_URL + ep.path;
       const opts = { method: ep.method, headers: {} };
       let bodyObj = null;
+
       if (ep.hasBody) {
-        try { bodyObj = JSON.parse(document.getElementById('body-'+i).value); }
-        catch(e) { loader.style.display='none'; ra.classList.add('visible'); st.className='status-code status-4xx'; st.textContent='ERR'; rb.textContent='Invalid JSON: '+e.message; return; }
+        try {
+          bodyObj = JSON.parse(document.getElementById('body-'+i).value);
+        } catch(e) {
+          loader.style.display = 'none';
+          execBtn.disabled = false;
+          respSection.style.display = 'block';
+          respCode.textContent = 'ERR';
+          respCode.className = 'response-code code-4xx';
+          respCodeLabel.textContent = 'Invalid JSON';
+          respBody.textContent = 'Invalid JSON: '+e.message;
+          return;
+        }
       }
+
       if (ep.hasModel && bodyObj) {
-        const model = document.getElementById('model-'+i).value;
-        bodyObj.model = model;
-        if (ep.hasModelInPath) url = BASE_URL + ep.path.replace(':model', model);
+        const modelSel = document.getElementById('model-'+i);
+        if (modelSel) {
+          bodyObj.model = modelSel.value;
+          if (ep.hasModelInPath) {
+            url = BASE_URL + ep.path.replace(':model', modelSel.value);
+          }
+        }
       }
-      if (bodyObj) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(bodyObj); }
+
+      if (bodyObj) {
+        opts.headers['Content-Type'] = 'application/json';
+        opts.body = JSON.stringify(bodyObj);
+      }
+
+      const curl = generateCurl(ep, bodyObj, url);
+      curlContent.textContent = curl;
+      curlArea.style.display = 'block';
+      reqUrl.textContent = url;
+      reqUrlArea.style.display = 'block';
+      respSection.style.display = 'block';
+
+      let rawText = '';
+
       try {
         const res = await fetch(url, opts);
-        st.textContent = res.status;
-        st.className = 'status-code '+(res.status>=200&&res.status<300?'status-2xx':res.status>=400&&res.status<500?'status-4xx':'status-5xx');
-        const text = await res.text();
+
+        respCode.textContent = res.status;
+        respCode.className = 'response-code '+(res.status>=200&&res.status<300?'code-2xx':res.status>=400&&res.status<500?'code-4xx':'code-5xx');
+        respCodeLabel.textContent = res.statusText || '';
+
+        rawText = await res.text();
         let formatted;
-        try { formatted = syntaxHighlight(JSON.stringify(JSON.parse(text), null, 2)); } catch { formatted = text.replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-        rb.innerHTML = formatted;
-        ra.classList.add('visible');
+        try {
+          formatted = syntaxHighlight(JSON.stringify(JSON.parse(rawText), null, 2));
+        } catch {
+          formatted = rawText.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+        respBody.innerHTML = formatted;
+        dlBtn.style.display = 'block';
+
+        let headersStr = '';
+        res.headers.forEach((val, key) => { headersStr += key+': '+val+'\n'; });
+        respHeaders.textContent = headersStr;
+        respHeaders.classList.remove('visible');
+
       } catch(e) {
-        st.className = 'status-code status-5xx'; st.textContent = 'ERR';
-        rb.textContent = 'Request failed: '+e.message; ra.classList.add('visible');
+        respCode.textContent = 'ERR';
+        respCode.className = 'response-code code-5xx';
+        respCodeLabel.textContent = 'Network Error';
+        respBody.textContent = 'Request failed: '+e.message;
+        dlBtn.style.display = 'none';
       }
+
       loader.style.display = 'none';
+      execBtn.disabled = false;
+    }
+
+    function copyCurl(i) {
+      const content = document.getElementById('curlContent-'+i).textContent;
+      const btn = document.getElementById('curlCopyBtn-'+i);
+      copyToClipboard(content, btn);
+    }
+
+    function downloadResp(i) {
+      const body = document.getElementById('respBody-'+i);
+      downloadResponse(body.textContent, 'response-'+i+'.json');
+    }
+
+    function toggleHeaders(i) {
+      document.getElementById('respHeaders-'+i).classList.toggle('visible');
+    }
+
+    async function saveToken() {
+      const input = document.getElementById('authInput').value.trim();
+      const status = document.getElementById('authStatus');
+      if (!input) { alert('Paste cookie string atau JWT token dulu.'); return; }
+      try {
+        const res = await fetch(BASE_URL + '/auth/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cookies: input })
+        });
+        const data = await res.json();
+        status.classList.add('visible');
+        if (data.success) {
+          status.className = 'auth-status visible success';
+          const ti = data.token_info || {};
+          status.innerHTML = '<strong>Token berhasil disimpan!</strong> Semua API call otomatis pakai token ini.'
+            + (ti.expires_at ? '<br>Expires: '+new Date(ti.expires_at).toLocaleString() : '')
+            + (ti.user_id ? ' | User: '+ti.user_id : '')
+            + (ti.region ? ' | Region: '+ti.region : '');
+        } else {
+          status.className = 'auth-status visible error';
+          status.textContent = 'Gagal: '+(data.error||'Unknown error');
+        }
+      } catch (e) {
+        status.className = 'auth-status visible error';
+        status.textContent = 'Error: '+e.message;
+      }
+    }
+
+    async function checkStatus() {
+      const status = document.getElementById('authStatus');
+      try {
+        const res = await fetch(BASE_URL + '/auth/status');
+        const data = await res.json();
+        status.classList.add('visible');
+        if (data.has_token === false) {
+          status.className = 'auth-status visible info';
+          status.textContent = 'Belum ada token di server.';
+        } else {
+          const ti = data.token_info || {};
+          if (ti.is_expired === false) {
+            status.className = 'auth-status visible success';
+            status.innerHTML = '<strong>Token Valid</strong> | Expires: '+new Date(ti.expires_at).toLocaleString()
+              + (ti.user_id ? ' | User: '+ti.user_id : '')
+              + (ti.region ? ' | Region: '+ti.region : '')
+              + '<br>Preview: '+(data.token_preview||'');
+          } else {
+            status.className = 'auth-status visible error';
+            status.textContent = 'Token Expired: '+new Date(ti.expires_at).toLocaleString();
+          }
+        }
+      } catch (e) {
+        status.className = 'auth-status visible error';
+        status.textContent = 'Error: '+e.message;
+      }
+    }
+
+    async function clearToken() {
+      const status = document.getElementById('authStatus');
+      try {
+        await fetch(BASE_URL + '/auth/clear');
+        document.getElementById('authInput').value = '';
+        status.className = 'auth-status visible info';
+        status.textContent = 'Token di server berhasil dihapus.';
+      } catch (e) {
+        status.className = 'auth-status visible error';
+        status.textContent = 'Error: '+e.message;
+      }
     }
 
     function init() {
-      buildModelOptions('chatModel');
+      initServers();
       renderEndpoints();
-      loadServerStatus();
     }
     init();
   </script>
