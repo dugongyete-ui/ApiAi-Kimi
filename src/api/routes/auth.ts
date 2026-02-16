@@ -1,12 +1,10 @@
 import _ from 'lodash';
 import Request from '@/lib/request/Request.ts';
 import logger from '@/lib/logger.ts';
-
-let serverToken = '';
-let serverTokenInfo: any = null;
+import tokenStore from '@/lib/token-store.ts';
 
 export function getServerToken(): string {
-    return serverToken;
+    return tokenStore.getToken();
 }
 
 function decodeToken(token: string): any {
@@ -23,7 +21,8 @@ function decodeToken(token: string): any {
             issued_at: payload.iat ? new Date(payload.iat * 1000).toISOString() : null,
             expires_at: payload.exp ? new Date(payload.exp * 1000).toISOString() : null,
             is_expired: payload.exp ? (Date.now() / 1000) > payload.exp : null,
-            membership_level: payload.membership?.level
+            membership_level: payload.membership?.level,
+            remaining_hours: payload.exp ? Math.max(0, Math.round((payload.exp - Date.now() / 1000) / 3600 * 10) / 10) : null
         };
     } catch (e) {
         return { valid: false, error: 'Failed to decode JWT payload' };
@@ -89,42 +88,45 @@ export default {
                 };
             }
 
-            serverToken = kimiAuth;
-            serverTokenInfo = tokenInfo;
-            logger.success('Server token saved successfully');
+            tokenStore.save(kimiAuth, tokenInfo.expires_at, tokenInfo.expires_at ? Math.floor(new Date(tokenInfo.expires_at).getTime() / 1000) : null);
+            logger.success('Server token saved successfully (persistent)');
 
             return {
                 success: true,
-                message: 'Token saved to server. All API calls will use this token automatically.',
-                token_info: tokenInfo
+                message: 'Token saved to server (persistent). Akan tetap tersimpan walau server restart.',
+                token_info: tokenInfo,
+                storage: 'persistent_file'
             };
         }
     },
 
     get: {
         '/status': async () => {
-            if (!serverToken) {
+            if (!tokenStore.hasToken()) {
                 return {
                     has_token: false,
                     message: 'No token saved on server'
                 };
             }
 
-            const tokenInfo = decodeToken(serverToken);
+            const token = tokenStore.getToken();
+            const tokenInfo = decodeToken(token);
+            const storeInfo = tokenStore.getInfo();
             return {
                 has_token: true,
                 token_info: tokenInfo,
-                token_preview: serverToken.substring(0, 30) + '...'
+                token_preview: token.substring(0, 30) + '...',
+                saved_at: storeInfo?.saved_at || null,
+                storage: 'persistent_file'
             };
         },
 
         '/clear': async () => {
-            serverToken = '';
-            serverTokenInfo = null;
-            logger.info('Server token cleared');
+            tokenStore.clear();
+            logger.info('Server token cleared (persistent)');
             return {
                 success: true,
-                message: 'Server token cleared'
+                message: 'Server token cleared from persistent storage'
             };
         }
     }
