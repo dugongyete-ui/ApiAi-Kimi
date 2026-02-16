@@ -1251,8 +1251,9 @@
         if (data.success) {
           status.className = 'auth-status visible success';
           const ti = data.token_info || {};
-          status.innerHTML = '<strong>Token berhasil disimpan!</strong> Semua API call otomatis pakai token ini.'
+          status.innerHTML = '<strong>Token berhasil disimpan (Persistent)!</strong> Token akan tetap tersimpan walau server restart.'
             + (ti.expires_at ? '<br>Expires: '+new Date(ti.expires_at).toLocaleString() : '')
+            + (ti.remaining_hours != null ? ' ('+ti.remaining_hours+' jam lagi)' : '')
             + (ti.user_id ? ' | User: '+ti.user_id : '')
             + (ti.region ? ' | Region: '+ti.region : '');
         } else {
@@ -1278,9 +1279,13 @@
           const ti = data.token_info || {};
           if (ti.is_expired === false) {
             status.className = 'auth-status visible success';
-            status.innerHTML = '<strong>Token Valid</strong> | Expires: '+new Date(ti.expires_at).toLocaleString()
+            status.innerHTML = '<strong>Token Valid (Persistent)</strong>'
+              + (ti.expires_at ? ' | Expires: '+new Date(ti.expires_at).toLocaleString() : '')
+              + (ti.remaining_hours != null ? ' ('+ti.remaining_hours+' jam lagi)' : '')
               + (ti.user_id ? ' | User: '+ti.user_id : '')
               + (ti.region ? ' | Region: '+ti.region : '')
+              + (data.saved_at ? '<br>Disimpan: '+new Date(data.saved_at).toLocaleString() : '')
+              + ' | Storage: persistent file'
               + '<br>Preview: '+(data.token_preview||'');
           } else {
             status.className = 'auth-status visible error';
@@ -1299,7 +1304,7 @@
         await fetch(BASE_URL + '/auth/clear');
         document.getElementById('authInput').value = '';
         status.className = 'auth-status visible info';
-        status.textContent = 'Token di server berhasil dihapus.';
+        status.textContent = 'Token di server berhasil dihapus dari persistent storage.';
       } catch (e) {
         status.className = 'auth-status visible error';
         status.textContent = 'Error: '+e.message;
@@ -1575,6 +1580,7 @@
       renderEndpoints();
       initChatModelSelect();
       updateChatApiInfo();
+      checkStatus();
     }
     init();
   </script>
