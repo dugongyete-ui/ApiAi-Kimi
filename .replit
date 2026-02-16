@@ -33,3 +33,8 @@ externalPort = 80
 
 [agent]
 expertMode = true
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["node", "--enable-source-maps", "--no-node-snapshot", "dist/index.js"]
+build = ["npm", "run", "build"]

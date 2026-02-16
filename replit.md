@@ -6,10 +6,11 @@
 
 Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi untuk berjalan sepenuhnya di Replit pada port 5000.
 
-### Status: Berjalan (Running)
+### Status: Berjalan (Running) - Semua Tested OK
 - Server aktif di port 5000
-- Semua endpoint sudah ditest dan berfungsi
-- API Documentation UI (Swagger-style) tersedia di halaman utama (REST API only)
+- Semua endpoint sudah ditest dan berfungsi (streaming & non-streaming)
+- API Documentation UI (Swagger-style) tersedia di halaman utama
+- Token auth tersimpan di server (valid sampai 2026-03-18)
 
 ## Project Architecture
 
@@ -53,6 +54,26 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 ├── tsconfig.json
 └── vercel.json           # Vercel deployment config
 ```
+
+## Streaming Support (Semua Format)
+
+### Cara Kerja Streaming
+Semua respon AI bisa di-stream per kata/token, seperti ChatGPT aslinya. Format SSE (Server-Sent Events) digunakan.
+
+### Endpoint & Streaming Status (Tested 2026-02-16)
+
+| Format | Endpoint | Streaming | Non-Streaming | Status Test |
+|--------|----------|-----------|---------------|-------------|
+| OpenAI | `POST /v1/chat/completions` | `"stream": true` | `"stream": false` | OK |
+| Claude | `POST /v1/messages` | `"stream": true` | `"stream": false` | OK |
+| Gemini | `POST /v1beta/models/:model:streamGenerateContent` | Otomatis | - | OK |
+| Gemini | `POST /v1beta/models/:model:generateContent` | - | Otomatis | OK |
+
+### Penting: Semua Model = Kimi AI Backend
+API "Claude" dan "Gemini" di sini BUKAN API asli. Ini adalah ADAPTER yang:
+- Menerima request dalam format Claude/Gemini
+- Meneruskan ke Kimi AI
+- Mengembalikan respon dalam format Claude/Gemini
 
 ## Model AI yang Didukung (16 Model)
 
@@ -99,13 +120,13 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 | `/v1beta/models` | GET | Daftar model Gemini-compatible | OK |
 
 ### Endpoint Autentikasi (Butuh Kimi Auth Token)
-| Endpoint | Method | Deskripsi | Token |
-|----------|--------|-----------|-------|
-| `/v1/chat/completions` | POST | Chat completion (OpenAI format) | refresh_token / JWT |
-| `/v1/messages` | POST | Chat completion (Claude format) | JWT (kimi-auth) |
-| `/v1beta/models/:model:generateContent` | POST | Content generation (Gemini) | JWT |
-| `/v1beta/models/:model:streamGenerateContent` | POST | Streaming content (Gemini) | JWT |
-| `/token/check` | POST | Cek validitas token | refresh_token |
+| Endpoint | Method | Deskripsi | Streaming |
+|----------|--------|-----------|-----------|
+| `/v1/chat/completions` | POST | Chat completion (OpenAI format) | Ya (`stream: true`) |
+| `/v1/messages` | POST | Chat completion (Claude format) | Ya (`stream: true`) |
+| `/v1beta/models/:model:generateContent` | POST | Content generation (Gemini) | Tidak |
+| `/v1beta/models/:model:streamGenerateContent` | POST | Streaming content (Gemini) | Ya (otomatis) |
+| `/token/check` | POST | Cek validitas token | - |
 
 ### Endpoint Token Management (Server-Side)
 | Endpoint | Method | Deskripsi | Status |
@@ -115,41 +136,31 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 | `/auth/status` | GET | Cek status token di server (expiry, user info) | OK |
 | `/auth/clear` | GET | Hapus token dari server | OK |
 
-## API Documentation UI (Swagger-style)
-
-1. **Base URL & Server Selector** - Dropdown server selector di header
-2. **Authorize Section** - Save/cek/hapus token langsung dari halaman
-3. **Endpoint Groups** - Dikelompokkan per kategori (Health, OpenAI, Claude, Gemini, Token Management)
-4. **Execute & Test** - Setiap endpoint bisa di-execute langsung dari browser
-5. **Curl Command** - Auto-generate curl command yang bisa di-copy untuk test di terminal
-6. **Request URL** - Menampilkan full request URL
-7. **Response Viewer** - JSON syntax highlighting, download response, response headers
-8. **Model Selector** - Dropdown 16 model AI untuk endpoint yang butuh model
-
-## Auto Setup Script
-
-```bash
-chmod +x setup.sh
-./setup.sh
-```
-Script ini otomatis: install dependencies, build TypeScript, verifikasi output.
-
 ## Dual API System
 - **Traditional API** (refresh_token): Fitur lengkap - multi-turn chat, file upload, image parsing, search
 - **Connect RPC API** (kimi-auth JWT): Basic chat, streaming, K2.5 support
 
+## Untuk Website Chat AI
+Jika ingin membuat website chat AI dengan streaming:
+1. Gunakan endpoint `POST /v1/chat/completions` dengan `"stream": true`
+2. Parse SSE events (`data: {...}`) di frontend
+3. Setiap chunk berisi `choices[0].delta.content` = potongan teks
+4. Stream berakhir dengan `data: [DONE]`
+
+## Deployment
+- Build: `npm run build`
+- Start: `node --enable-source-maps --no-node-snapshot dist/index.js`
+- Port: 5000
+
 ## Recent Changes
-- 2026-02-16: Redesign UI jadi Swagger-style REST API documentation (hapus Chat AI test)
-- 2026-02-16: Tambah curl command generator + copy button
-- 2026-02-16: Tambah Request URL display
-- 2026-02-16: Tambah response headers viewer + download response
-- 2026-02-16: Tambah endpoint groups (Health, OpenAI, Claude, Gemini, Token)
-- 2026-02-16: Buat setup.sh auto-download dependencies script
-- 2026-02-16: Test semua endpoint - semua berfungsi
+- 2026-02-16: Full test semua endpoint streaming & non-streaming - SEMUA OK
+- 2026-02-16: Token auth berhasil disimpan (valid sampai 2026-03-18)
+- 2026-02-16: Redesign UI jadi Swagger-style REST API documentation
 - 2026-02-16: Server-side token storage
 - 2026-02-16: Tambah model K2.5 Series
 
 ## User Preferences
 - Bahasa komunikasi: Bahasa Indonesia
 - Project di-clone dari GitHub, dikembangkan di Replit
-- Prefer REST API documentation style (Swagger-like), tanpa chat AI test UI
+- Prefer REST API documentation style (Swagger-like)
+- Ingin streaming response untuk website chat AI
