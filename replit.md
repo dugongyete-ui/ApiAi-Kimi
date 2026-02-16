@@ -1,15 +1,15 @@
-# Kimi Free API Fix - Project Summary
+# SANSEKAI API Documentation - Project Summary
 
 ## Overview
 
-**Kimi Free API Fix** adalah server API proxy yang mengubah layanan Kimi AI (dari Moonshot AI) menjadi API yang kompatibel dengan format OpenAI, Google Gemini, dan Anthropic Claude. Server ini ditulis dalam TypeScript menggunakan framework Koa.js.
+**SANSEKAI API** (Kimi Free API Fix) adalah server API proxy yang mengubah layanan Kimi AI (dari Moonshot AI) menjadi API yang kompatibel dengan format OpenAI, Google Gemini, dan Anthropic Claude. Server ini ditulis dalam TypeScript menggunakan framework Koa.js.
 
 Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi untuk berjalan sepenuhnya di Replit pada port 5000.
 
 ### Status: Berjalan (Running)
 - Server aktif di port 5000
 - Semua endpoint sudah ditest dan berfungsi
-- Swagger-like Interactive UI tersedia di halaman utama
+- Swagger-style API Documentation UI tersedia di halaman utama (REST API only)
 
 ## Project Architecture
 
@@ -23,7 +23,7 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 ### Directory Structure
 ```
 ├── configs/dev/          # Konfigurasi service & system (YAML)
-├── public/               # Static files (welcome.html - Swagger UI)
+├── public/               # Static files (welcome.html - Swagger-style API docs)
 ├── src/
 │   ├── api/
 │   │   ├── controllers/  # Business logic
@@ -38,7 +38,7 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 │   │   │   ├── models.ts # GET /v1/models (16 models termasuk K2.5)
 │   │   │   ├── gemini.ts # Gemini endpoints (/v1beta/...)
 │   │   │   ├── claude.ts # Claude endpoint (POST /v1/messages)
-│   │   │   └── auth.ts   # POST /auth/extract (Kimi Auth extraction)
+│   │   │   └── auth.ts   # Token management endpoints
 │   │   └── consts/       # Exception constants
 │   ├── lib/              # Core utilities
 │   │   ├── connect-rpc/  # Connect RPC protocol implementation
@@ -48,6 +48,7 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 │   │   └── util.ts       # Utilities
 │   └── index.ts          # Entry point
 ├── dist/                 # Built output (auto-generated)
+├── setup.sh              # Auto-download dependencies script
 ├── package.json
 ├── tsconfig.json
 └── vercel.json           # Vercel deployment config
@@ -92,12 +93,12 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 ### Endpoint Tanpa Autentikasi
 | Endpoint | Method | Deskripsi | Status |
 |----------|--------|-----------|--------|
-| `/` | GET | Swagger-like Interactive API Explorer | OK |
+| `/` | GET | Swagger-style API Documentation | OK |
 | `/ping` | GET | Health check, return "pong" | OK |
 | `/v1/models` | GET | Daftar 16 model (termasuk K2.5) | OK |
 | `/v1beta/models` | GET | Daftar model Gemini-compatible | OK |
 
-### Endpoint Autentikasi
+### Endpoint Autentikasi (Butuh Kimi Auth Token)
 | Endpoint | Method | Deskripsi | Token |
 |----------|--------|-----------|-------|
 | `/v1/chat/completions` | POST | Chat completion (OpenAI format) | refresh_token / JWT |
@@ -114,41 +115,41 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 | `/auth/status` | GET | Cek status token di server (expiry, user info) | OK |
 | `/auth/clear` | GET | Hapus token dari server | OK |
 
-## Server-Side Token Management
-- Token disimpan di memory server via `/auth/save`
-- Semua endpoint (chat, gemini, claude) otomatis pakai server token jika tidak ada Authorization header
-- User cukup paste cookie/JWT sekali, semua API call otomatis terautentikasi
-- Token info (expiry, user, region, membership) ditampilkan setelah save
+## Swagger-style API Documentation UI
 
-## Fitur Website (Swagger-like UI)
+1. **Base URL & Server Selector** - Dropdown server selector di header
+2. **Authorize Section** - Save/cek/hapus token langsung dari halaman
+3. **Endpoint Groups** - Dikelompokkan per kategori (Health, OpenAI, Claude, Gemini, Token Management)
+4. **Execute & Test** - Setiap endpoint bisa di-execute langsung dari browser
+5. **Curl Command** - Auto-generate curl command yang bisa di-copy untuk test di terminal
+6. **Request URL** - Menampilkan full request URL
+7. **Response Viewer** - JSON syntax highlighting, download response, response headers
+8. **Model Selector** - Dropdown 16 model AI untuk endpoint yang butuh model
 
-1. **Base URL Display** - Ditampilkan di header halaman utama
-2. **Server-Side Token Management** - Save token ke server, auto-used untuk semua API calls
-3. **Chat Test UI** - Input text sederhana + model selector (tanpa perlu edit JSON)
-   - Model diberi tanda bintang untuk yang terbaik coding (K2.5 Thinking, K2.5 Agent, K2-0905, K2-Thinking)
-   - Typing indicator saat menunggu response
-4. **Interactive API Explorer** - Setiap endpoint bisa di-execute langsung dari browser:
-   - Model selector dropdown (K2.5, K2, Moonshot, Vision, Latest)
-   - Request body editor (JSON)
-   - Response viewer dengan JSON syntax highlighting
-5. **Token Info** - Decode JWT dan tampilkan info (expiry, user, region, membership)
+## Auto Setup Script
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+Script ini otomatis: install dependencies, build TypeScript, verifikasi output.
 
 ## Dual API System
 - **Traditional API** (refresh_token): Fitur lengkap - multi-turn chat, file upload, image parsing, search
 - **Connect RPC API** (kimi-auth JWT): Basic chat, streaming, K2.5 support
 
 ## Recent Changes
-- 2026-02-16: Server-side token storage - save once, auto-used for all API calls
-- 2026-02-16: Simplified Chat Test UI - text input + model selector (no JSON editing)
-- 2026-02-16: Best coding models marked with star (K2.5 Thinking, K2.5 Agent, K2-0905, K2-Thinking)
-- 2026-02-16: All endpoints (chat, gemini, claude) use server token as fallback
-- 2026-02-16: Tambah model K2.5 (Instant, Thinking, Agent, Agent Swarm)
-- 2026-02-16: Buat Swagger-like Interactive API Explorer UI
-- 2026-02-16: Tambah endpoint /auth/extract untuk extract kimi-auth dari cookies
-- 2026-02-16: Base URL display di website
-- 2026-02-16: Update chat controller untuk handle K2.5 model scenarios
-- 2026-02-16: Cache-Control headers untuk prevent stale content
+- 2026-02-16: Redesign UI jadi Swagger-style REST API documentation (hapus Chat AI test)
+- 2026-02-16: Tambah curl command generator + copy button
+- 2026-02-16: Tambah Request URL display
+- 2026-02-16: Tambah response headers viewer + download response
+- 2026-02-16: Tambah endpoint groups (Health, OpenAI, Claude, Gemini, Token)
+- 2026-02-16: Buat setup.sh auto-download dependencies script
+- 2026-02-16: Test semua endpoint - semua berfungsi
+- 2026-02-16: Server-side token storage
+- 2026-02-16: Tambah model K2.5 Series
 
 ## User Preferences
 - Bahasa komunikasi: Bahasa Indonesia
 - Project di-clone dari GitHub, dikembangkan di Replit
+- Prefer REST API documentation style (Swagger-like), tanpa chat AI test UI
