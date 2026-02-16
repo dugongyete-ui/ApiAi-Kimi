@@ -1320,6 +1320,7 @@
     /* ===== CHAT SYSTEM ===== */
     let chatMessages = [];
     let chatAbortController = null;
+    let currentConversationId = null;
 
     function initChatModelSelect() {
       const sel = document.getElementById('chatModel');
@@ -1354,17 +1355,23 @@
       historyMsgs.push({ role: 'user', content: message });
 
       if (format === 'openai') {
-        return { model, messages: historyMsgs, stream: true };
+        const body = { model, messages: historyMsgs, stream: true };
+        if (currentConversationId) body.conversation_id = currentConversationId;
+        return body;
       }
       if (format === 'claude') {
-        return { model, max_tokens: 4096, messages: historyMsgs, stream: true };
+        const body = { model, max_tokens: 4096, messages: historyMsgs, stream: true };
+        if (currentConversationId) body.conversation_id = currentConversationId;
+        return body;
       }
       if (format === 'gemini') {
         const contents = historyMsgs.map(m => ({
           role: m.role === 'assistant' ? 'model' : 'user',
           parts: [{ text: m.content }]
         }));
-        return { contents };
+        const body = { contents };
+        if (currentConversationId) body.conversation_id = currentConversationId;
+        return body;
       }
       return {};
     }
@@ -1487,6 +1494,9 @@
               if (trimmed.startsWith('data: ')) {
                 try {
                   const data = JSON.parse(trimmed.slice(6));
+                  if (data.id && !currentConversationId) {
+                    currentConversationId = data.id;
+                  }
                   if (data.choices && data.choices[0] && data.choices[0].delta && data.choices[0].delta.content) {
                     fullContent += data.choices[0].delta.content;
                     bubble.textContent = fullContent;
@@ -1498,6 +1508,9 @@
               if (trimmed.startsWith('data: ')) {
                 try {
                   const data = JSON.parse(trimmed.slice(6));
+                  if (data.id && !currentConversationId) {
+                    currentConversationId = data.id;
+                  }
                   if (data.type === 'content_block_delta' && data.delta && data.delta.text) {
                     fullContent += data.delta.text;
                     bubble.textContent = fullContent;
@@ -1509,6 +1522,9 @@
               if (trimmed.startsWith('data: ')) {
                 try {
                   const data = JSON.parse(trimmed.slice(6));
+                  if (data.conversation_id && !currentConversationId) {
+                    currentConversationId = data.conversation_id;
+                  }
                   if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
                     for (const part of data.candidates[0].content.parts) {
                       if (part.text) {
@@ -1542,6 +1558,7 @@
 
     function clearChat() {
       chatMessages = [];
+      currentConversationId = null;
       document.getElementById('chatMessages').innerHTML = '';
       if (chatAbortController) {
         chatAbortController.abort();

@@ -98,6 +98,8 @@ export function convertKimiStreamToGemini(kimiStream: any): PassThrough {
     const transStream = new PassThrough();
     let contentBuffer = "";
     let isFirstChunk = true;
+    let capturedConversationId = "";
+    let conversationIdCaptured = false;
 
     kimiStream.on("data", (chunk: Buffer) => {
         const lines = chunk.toString().split("\n");
@@ -112,10 +114,14 @@ export function convertKimiStreamToGemini(kimiStream: any): PassThrough {
                     if (data.choices && data.choices[0]) {
                         const delta = data.choices[0].delta;
 
-                        // Handle content delta
+                        if (data.id && !conversationIdCaptured) {
+                            capturedConversationId = data.id;
+                            conversationIdCaptured = true;
+                        }
+
                         if (delta.content) {
                             contentBuffer += delta.content;
-                            const geminiChunk = {
+                            const geminiChunk: any = {
                                 candidates: [
                                     {
                                         content: {
@@ -132,6 +138,9 @@ export function convertKimiStreamToGemini(kimiStream: any): PassThrough {
                                     }
                                 ]
                             };
+                            if (capturedConversationId) {
+                                geminiChunk.conversation_id = capturedConversationId;
+                            }
                             transStream.write(`data: ${JSON.stringify(geminiChunk)}\n\n`);
                         }
 
@@ -198,31 +207,29 @@ export async function createGeminiCompletion(
     contents: any[],
     systemInstruction: any,
     authToken: string,
-    stream: boolean = false
+    stream: boolean = false,
+    conversationId?: string
 ): Promise<any | PassThrough> {
     try {
-        // Convert Gemini format to Kimi format
         const kimiMessages = convertGeminiToKimi(contents, systemInstruction);
 
         if (stream) {
-            // Use V2 API's native streaming support
             const kimiStream = await createCompletionStreamV2(
                 model,
                 kimiMessages,
-                authToken
+                authToken,
+                conversationId
             );
 
-            // Convert Kimi V2 stream to Gemini format
             return convertKimiStreamToGemini(kimiStream);
         } else {
-            // Create regular completion using V2 API
             const kimiResponse = await createCompletionV2(
                 model,
                 kimiMessages,
-                authToken
+                authToken,
+                conversationId
             );
 
-            // Convert Kimi response to Gemini format
             return convertKimiToGemini(kimiResponse);
         }
     } catch (error) {

@@ -69,14 +69,15 @@ export default {
             const authToken = tokenHeader.replace(/^Bearer\s+/i, '').trim();
 
             const model = request.params.model || 'gemini-pro';
-            const { contents, systemInstruction } = request.body;
+            const { contents, systemInstruction, conversation_id } = request.body;
 
             const geminiResponse = await createGeminiCompletion(
                 model,
                 contents,
                 systemInstruction,
                 authToken,
-                false
+                false,
+                conversation_id
             );
             return geminiResponse;
         },
@@ -97,14 +98,15 @@ export default {
             const authToken = tokenHeader.replace(/^Bearer\s+/i, '').trim();
 
             const model = request.params.model || 'gemini-pro';
-            const { contents, systemInstruction } = request.body;
+            const { contents, systemInstruction, conversation_id } = request.body;
 
             const geminiStream = await createGeminiCompletion(
                 model,
                 contents,
                 systemInstruction,
                 authToken,
-                true
+                true,
+                conversation_id
             );
             return new Response(geminiStream, {
                 type: "text/event-stream"
