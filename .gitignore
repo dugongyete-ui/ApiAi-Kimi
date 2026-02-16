@@ -1,4 +1,7 @@
 dist/
 node_modules/
 logs/
+tmp/
 .vercel
+.cache/
+*.log
