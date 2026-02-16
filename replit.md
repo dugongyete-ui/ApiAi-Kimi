@@ -49,11 +49,13 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 │   │   │   ├── protocol.ts  # Binary protocol encode/decode
 │   │   │   ├── types.ts     # TypeScript types (ChatRequest, ConnectMessage, dll)
 │   │   │   └── index.ts     # Module exports
+│   │   ├── token-store.ts # Persistent token storage (file-based)
 │   │   ├── server.ts     # Koa server setup
 │   │   ├── config.ts     # Config loader
 │   │   ├── logger.ts     # Logging
 │   │   └── util.ts       # Utilities
 │   └── index.ts          # Entry point
+├── data/                 # Persistent data (token.json - gitignored)
 ├── dist/                 # Built output (auto-generated)
 ├── setup.sh              # Auto-download dependencies script
 ├── package.json
@@ -203,6 +205,12 @@ Jika ingin membuat website chat AI dengan streaming:
 - Port: 5000
 
 ## Recent Changes
+- 2026-02-16: PERSISTENT TOKEN STORAGE - Token sekarang disimpan di file (data/token.json), tidak hilang saat server restart
+  - Modul baru: src/lib/token-store.ts (file-based persistent storage)
+  - Auto-load token saat server start
+  - Auto-clear token expired
+  - Frontend auto-check status saat halaman dibuka
+  - Menampilkan info remaining hours dan saved_at
 - 2026-02-16: FIX frontend chat tidak melanjutkan percakapan - sekarang conversation_id di-track dan dikirim otomatis
 - 2026-02-16: Gemini adapter sekarang support conversation_id passthrough
 - 2026-02-16: FIX conversation continuation - chat sekarang bisa dilanjutkan via chatId
@@ -223,7 +231,7 @@ Jika ingin membuat website chat AI dengan streaming:
 
 ## Rencana Kedepan
 - Buat website chat AI frontend yang menggunakan API ini
-- Implementasi penyimpanan token secara persistent (database/file)
 - Tambah fitur file upload via Connect RPC
-- Auto-refresh token saat mendekati expired
+- Auto-refresh token saat mendekati expired (notifikasi ke user)
 - Rate limiting dan error handling yang lebih baik
+- Support multiple token (multi-user)
