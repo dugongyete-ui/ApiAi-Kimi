@@ -1,95 +1,133 @@
 import _ from 'lodash';
 
-// 支持的模型列表，基于官方API返回的模型
 const SUPPORTED_MODELS = [
-    // kimi-k2 模型
+    {
+        "id": "kimi-k2.5-instant",
+        "name": "K2.5 Instant",
+        "object": "model",
+        "owned_by": "moonshot",
+        "description": "Quick response, 256k context, fast 3-8s responses",
+        "category": "k2.5"
+    },
+    {
+        "id": "kimi-k2.5-thinking",
+        "name": "K2.5 Thinking",
+        "object": "model",
+        "owned_by": "moonshot",
+        "description": "Deep thinking for complex questions, chain-of-thought reasoning",
+        "category": "k2.5"
+    },
+    {
+        "id": "kimi-k2.5-agent",
+        "name": "K2.5 Agent",
+        "object": "model",
+        "owned_by": "moonshot",
+        "description": "Research, slides, websites, docs, sheets - tool-calling workflows",
+        "category": "k2.5"
+    },
+    {
+        "id": "kimi-k2.5-agent-swarm",
+        "name": "K2.5 Agent Swarm",
+        "object": "model",
+        "owned_by": "moonshot",
+        "description": "Multi-agent orchestration, up to 100 parallel sub-agents for complex tasks",
+        "category": "k2.5"
+    },
     {
         "id": "kimi-k2-0905-preview",
         "name": "K2-0905",
         "object": "model",
         "owned_by": "moonshot",
-        "description": "256k上下文，增强Agentic Coding能力和代码美观度"
+        "description": "256k context, enhanced Agentic Coding",
+        "category": "k2"
     },
     {
-        "id": "kimi-k2-0711-preview", 
+        "id": "kimi-k2-0711-preview",
         "name": "K2-0711",
         "object": "model",
         "owned_by": "moonshot",
-        "description": "128k上下文，1T参数MoE架构，强代码和Agent能力"
+        "description": "128k context, 1T params MoE architecture",
+        "category": "k2"
     },
     {
         "id": "kimi-k2-turbo-preview",
-        "name": "K2-Turbo", 
+        "name": "K2-Turbo",
         "object": "model",
         "owned_by": "moonshot",
-        "description": "K2高速版本，256k上下文，60-100 tokens/s"
+        "description": "K2 high-speed, 256k context, 60-100 tokens/s",
+        "category": "k2"
     },
     {
         "id": "kimi-k2-thinking",
         "name": "K2-Thinking",
-        "object": "model", 
+        "object": "model",
         "owned_by": "moonshot",
-        "description": "K2长思考模型，256k上下文，多步工具调用和深度推理"
+        "description": "K2 long-thinking model, multi-step tool calls and deep reasoning",
+        "category": "k2"
     },
     {
         "id": "kimi-k2-thinking-turbo",
         "name": "K2-Thinking-Turbo",
-        "object": "model", 
+        "object": "model",
         "owned_by": "moonshot",
-        "description": "K2长思考高速版，256k上下文，深度推理60-100 tokens/s"
+        "description": "K2 thinking high-speed, deep reasoning 60-100 tokens/s",
+        "category": "k2"
     },
-    
-    // 生成模型 moonshot-v1
     {
         "id": "moonshot-v1-8k",
         "name": "Moonshot-8K",
         "object": "model",
         "owned_by": "moonshot",
-        "description": "生成短文本，8k上下文"
+        "description": "Short text generation, 8k context",
+        "category": "moonshot"
     },
     {
-        "id": "moonshot-v1-32k", 
+        "id": "moonshot-v1-32k",
         "name": "Moonshot-32K",
         "object": "model",
         "owned_by": "moonshot",
-        "description": "生成长文本，32k上下文"
+        "description": "Long text generation, 32k context",
+        "category": "moonshot"
     },
     {
         "id": "moonshot-v1-128k",
-        "name": "Moonshot-128K", 
+        "name": "Moonshot-128K",
         "object": "model",
         "owned_by": "moonshot",
-        "description": "生成超长文本，128k上下文"
+        "description": "Ultra-long text generation, 128k context",
+        "category": "moonshot"
     },
     {
         "id": "moonshot-v1-8k-vision-preview",
         "name": "Moonshot-Vision-8K",
-        "object": "model", 
+        "object": "model",
         "owned_by": "moonshot",
-        "description": "视觉理解模型，8k上下文图文分析"
+        "description": "Vision model, 8k context image+text analysis",
+        "category": "vision"
     },
     {
         "id": "moonshot-v1-32k-vision-preview",
         "name": "Moonshot-Vision-32K",
-        "object": "model", 
+        "object": "model",
         "owned_by": "moonshot",
-        "description": "视觉理解模型，32k上下文图文分析"
+        "description": "Vision model, 32k context image+text analysis",
+        "category": "vision"
     },
     {
         "id": "moonshot-v1-128k-vision-preview",
         "name": "Moonshot-Vision-128K",
-        "object": "model", 
+        "object": "model",
         "owned_by": "moonshot",
-        "description": "视觉理解模型，128k上下文图文分析"
+        "description": "Vision model, 128k context image+text analysis",
+        "category": "vision"
     },
-    
-    // 生成模型 kimi-latest
     {
         "id": "kimi-latest",
         "name": "Kimi-Latest",
         "object": "model",
-        "owned_by": "moonshot", 
-        "description": "最新视觉模型，128k上下文图片理解"
+        "owned_by": "moonshot",
+        "description": "Latest vision model, 128k context",
+        "category": "latest"
     }
 ];
 
