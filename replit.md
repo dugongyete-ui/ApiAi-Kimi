@@ -11,6 +11,8 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 - Semua endpoint sudah ditest dan berfungsi (streaming & non-streaming)
 - API Documentation UI (Swagger-style) tersedia di halaman utama
 - Token auth tersimpan di server (valid sampai 2026-03-18)
+- Streaming per-kata SUDAH BERFUNGSI (true streaming via Connect RPC)
+- Melanjutkan percakapan (conversation continuation) SUDAH BERFUNGSI via chatId
 
 ## Project Architecture
 
@@ -29,7 +31,7 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 │   ├── api/
 │   │   ├── controllers/  # Business logic
 │   │   │   ├── chat.ts           # Traditional REST API (refresh_token)
-│   │   │   ├── chat-v2.ts        # Connect RPC API (JWT/kimi-auth)
+│   │   │   ├── chat-v2.ts        # Connect RPC API (JWT/kimi-auth) - TRUE STREAMING
 │   │   │   ├── gemini-adapter.ts # Gemini format adapter
 │   │   │   └── claude-adapter.ts # Claude format adapter
 │   │   ├── routes/       # Route definitions
@@ -43,6 +45,10 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 │   │   └── consts/       # Exception constants
 │   ├── lib/              # Core utilities
 │   │   ├── connect-rpc/  # Connect RPC protocol implementation
+│   │   │   ├── client.ts    # HTTP client (chat + chatStream true streaming)
+│   │   │   ├── protocol.ts  # Binary protocol encode/decode
+│   │   │   ├── types.ts     # TypeScript types (ChatRequest, ConnectMessage, dll)
+│   │   │   └── index.ts     # Module exports
 │   │   ├── server.ts     # Koa server setup
 │   │   ├── config.ts     # Config loader
 │   │   ├── logger.ts     # Logging
@@ -53,6 +59,48 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 ├── package.json
 ├── tsconfig.json
 └── vercel.json           # Vercel deployment config
+```
+
+## Fitur Utama
+
+### 1. True Streaming (Per-Kata)
+- Connect RPC client menggunakan `responseType: 'stream'` untuk menerima data secara real-time
+- Binary frames di-parse saat tiba, langsung dikirim ke client sebagai SSE chunks
+- Respons muncul per-kata/token, bukan menunggu selesai semua
+
+### 2. Conversation Continuation (Lanjutkan Percakapan)
+- Setiap chat pertama membuat chatId baru dari Kimi
+- ChatId dikembalikan dalam response `id` field
+- Kirim `conversation_id` di request body untuk melanjutkan chat yang sama
+- AI akan ingat konteks percakapan sebelumnya
+
+### 3. Multi-Format API Support
+- OpenAI format (`/v1/chat/completions`)
+- Claude format (`/v1/messages`)
+- Gemini format (`/v1beta/models/:model:generateContent`)
+- Semua format mengarah ke Kimi AI backend
+
+## Cara Pakai Conversation Continuation
+
+```json
+// Chat pertama (buat baru)
+POST /v1/chat/completions
+{
+  "model": "kimi-k2.5-thinking",
+  "messages": [{"role": "user", "content": "Hai, namaku Zaki"}],
+  "stream": true
+}
+// Response id = "abc123..."
+
+// Chat lanjutan (lanjutkan percakapan)
+POST /v1/chat/completions
+{
+  "model": "kimi-k2.5-thinking",
+  "conversation_id": "abc123...",
+  "messages": [{"role": "user", "content": "Siapa namaku?"}],
+  "stream": true
+}
+// AI akan ingat nama Zaki
 ```
 
 ## Streaming Support (Semua Format)
@@ -138,14 +186,16 @@ API "Claude" dan "Gemini" di sini BUKAN API asli. Ini adalah ADAPTER yang:
 
 ## Dual API System
 - **Traditional API** (refresh_token): Fitur lengkap - multi-turn chat, file upload, image parsing, search
-- **Connect RPC API** (kimi-auth JWT): Basic chat, streaming, K2.5 support
+- **Connect RPC API** (kimi-auth JWT): True streaming, conversation continuation, K2.5 support
 
 ## Untuk Website Chat AI
 Jika ingin membuat website chat AI dengan streaming:
 1. Gunakan endpoint `POST /v1/chat/completions` dengan `"stream": true`
 2. Parse SSE events (`data: {...}`) di frontend
 3. Setiap chunk berisi `choices[0].delta.content` = potongan teks
-4. Stream berakhir dengan `data: [DONE]`
+4. Response `id` = chatId, simpan untuk melanjutkan percakapan
+5. Kirim `conversation_id` di request body untuk melanjutkan
+6. Stream berakhir dengan `data: [DONE]`
 
 ## Deployment
 - Build: `npm run build`
@@ -153,6 +203,9 @@ Jika ingin membuat website chat AI dengan streaming:
 - Port: 5000
 
 ## Recent Changes
+- 2026-02-16: FIX conversation continuation - chat sekarang bisa dilanjutkan via chatId
+- 2026-02-16: FIX true streaming - response sekarang per-kata (bukan buffered sekaligus)
+- 2026-02-16: Connect RPC client chatStream() method dengan responseType: 'stream'
 - 2026-02-16: Full test semua endpoint streaming & non-streaming - SEMUA OK
 - 2026-02-16: Token auth berhasil disimpan (valid sampai 2026-03-18)
 - 2026-02-16: Redesign UI jadi Swagger-style REST API documentation
@@ -163,4 +216,12 @@ Jika ingin membuat website chat AI dengan streaming:
 - Bahasa komunikasi: Bahasa Indonesia
 - Project di-clone dari GitHub, dikembangkan di Replit
 - Prefer REST API documentation style (Swagger-like)
-- Ingin streaming response untuk website chat AI
+- Ingin streaming response per-kata untuk website chat AI
+- Ingin chat bisa melanjutkan percakapan (conversation continuation)
+
+## Rencana Kedepan
+- Buat website chat AI frontend yang menggunakan API ini
+- Implementasi penyimpanan token secara persistent (database/file)
+- Tambah fitur file upload via Connect RPC
+- Auto-refresh token saat mendekati expired
+- Rate limiting dan error handling yang lebih baik
