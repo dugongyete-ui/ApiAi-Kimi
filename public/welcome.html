@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
-  <title>Kimi Free API — Interactive API Explorer</title>
+  <title>Kimi Free API Explorer</title>
   <style>
     :root {
-      --bg: #fafbfc;
+      --bg: #f5f7fa;
       --surface: #ffffff;
-      --text: #1b1f24;
-      --muted: #57606a;
-      --subtle: #6e7781;
-      --border: #d0d7de;
-      --border-light: #e8ecf0;
+      --text: #1a1d23;
+      --muted: #5a6270;
+      --subtle: #7c8490;
+      --border: #d4d9e0;
+      --border-light: #e8ecf2;
       --primary: #667eea;
       --primary-2: #764ba2;
       --accent: #0969da;
@@ -29,289 +29,209 @@
       --post-color: #0550ae;
       --post-bg: #ddf4ff;
       --post-border: #80ccff;
-      --radius: 8px;
+      --radius: 10px;
       --shadow: 0 1px 3px rgba(27,31,36,0.06), 0 1px 2px rgba(27,31,36,0.04);
-      --shadow-md: 0 4px 12px rgba(27,31,36,0.08);
+      --shadow-md: 0 4px 16px rgba(27,31,36,0.1);
       --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
       --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      --star: #f59e0b;
     }
-
     *, *::before, *::after { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      font-family: var(--font-sans);
-      color: var(--text);
-      background: var(--bg);
-      line-height: 1.6;
-    }
-
-    .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+    body { margin: 0; font-family: var(--font-sans); color: var(--text); background: var(--bg); line-height: 1.6; }
+    .container { max-width: 980px; margin: 0 auto; padding: 0 20px; }
 
     header {
       background: linear-gradient(135deg, var(--primary), var(--primary-2));
       color: #fff;
-      padding: 32px 0 28px;
+      padding: 28px 0 24px;
     }
-    header h1 { margin: 0 0 6px; font-size: 28px; font-weight: 800; }
-    header p { margin: 0; opacity: 0.9; font-size: 15px; }
+    header h1 { margin: 0 0 4px; font-size: 26px; font-weight: 800; }
+    header p { margin: 0; opacity: 0.88; font-size: 14px; }
     .base-url-box {
-      margin-top: 16px;
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.25);
-      border-radius: var(--radius);
-      padding: 10px 14px;
+      margin-top: 14px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 8px;
+      padding: 9px 14px;
       font-family: var(--font-mono);
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      font-size: 13px;
+      display: flex; align-items: center; gap: 10px;
       backdrop-filter: blur(4px);
     }
-    .base-url-box .label { font-weight: 700; opacity: 0.8; font-family: var(--font-sans); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .base-url-box .label { font-weight: 700; opacity: 0.7; font-family: var(--font-sans); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
     .base-url-box .url { font-weight: 600; word-break: break-all; }
 
-    .section { margin: 24px 0; }
+    .section { margin: 20px 0; }
     .section-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin: 0 0 12px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      font-size: 17px; font-weight: 700; margin: 0 0 10px;
+      padding-bottom: 7px; border-bottom: 2px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
     }
-    .section-icon { font-size: 20px; }
 
-    .auth-card {
+    .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 20px;
+      padding: 18px;
       box-shadow: var(--shadow);
     }
-    .auth-card label {
-      display: block;
-      font-weight: 600;
-      font-size: 13px;
-      margin-bottom: 6px;
-      color: var(--muted);
+    .card label { display: block; font-weight: 600; font-size: 12px; margin-bottom: 5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; }
+    .card textarea, .card input[type="text"], .card select {
+      width: 100%; border: 1px solid var(--border); border-radius: 6px;
+      padding: 9px 10px; font-size: 13px; outline: none; transition: border-color 0.15s;
     }
-    .auth-card textarea {
-      width: 100%;
-      min-height: 80px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 10px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      resize: vertical;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    .auth-card textarea:focus { border-color: var(--primary); }
-    .auth-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-      flex-wrap: wrap;
-    }
+    .card textarea { font-family: var(--font-mono); font-size: 12px; min-height: 70px; resize: vertical; }
+    .card textarea:focus, .card input:focus, .card select:focus { border-color: var(--primary); }
+
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      background: var(--surface);
-      color: var(--text);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px;
+      background: var(--surface); color: var(--text); font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.15s;
     }
     .btn:hover { background: var(--bg); border-color: #b0b8c2; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      color: #fff;
-      border: none;
-    }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; border: none; }
     .btn-primary:hover { opacity: 0.9; }
-    .btn-success { background: var(--success); color: #fff; border: none; }
-    .btn-success:hover { opacity: 0.9; }
     .btn-danger { background: var(--warning); color: #fff; border: none; }
     .btn-danger:hover { opacity: 0.9; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
 
     .token-info {
-      margin-top: 12px;
-      padding: 12px;
-      background: #f6f8fa;
-      border: 1px solid var(--border-light);
-      border-radius: 6px;
-      font-size: 13px;
-      display: none;
+      margin-top: 10px; padding: 10px 12px; background: #f6f8fa;
+      border: 1px solid var(--border-light); border-radius: 6px; font-size: 12px; display: none;
     }
     .token-info.visible { display: block; }
-    .token-preview {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      word-break: break-all;
-      color: var(--muted);
-      margin: 6px 0;
-      max-height: 60px;
-      overflow: hidden;
-    }
     .token-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 3px 8px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 700;
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;
     }
     .token-valid { background: var(--success-bg); color: var(--success); }
     .token-expired { background: var(--warning-bg); color: var(--warning); }
     .token-unknown { background: #f6f8fa; color: var(--muted); }
 
-    .endpoint-card {
+    .chat-box {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      margin-bottom: 10px;
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-md);
       overflow: hidden;
     }
+    .chat-header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: #fff; padding: 14px 18px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .chat-header h3 { margin: 0; font-size: 16px; font-weight: 700; }
+    .chat-header select {
+      background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
+      color: #fff; border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 600;
+      outline: none; cursor: pointer; max-width: 240px;
+    }
+    .chat-header select option { color: #1a1d23; background: #fff; }
+    .chat-messages {
+      min-height: 180px; max-height: 420px; overflow-y: auto;
+      padding: 16px 18px; background: #fafbfd;
+    }
+    .chat-msg {
+      margin-bottom: 12px; display: flex; gap: 10px;
+    }
+    .chat-msg.user { justify-content: flex-end; }
+    .chat-msg .bubble {
+      max-width: 80%; padding: 10px 14px; border-radius: 14px;
+      font-size: 14px; line-height: 1.55; word-break: break-word; white-space: pre-wrap;
+    }
+    .chat-msg.user .bubble {
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: #fff; border-bottom-right-radius: 4px;
+    }
+    .chat-msg.assistant .bubble {
+      background: #fff; border: 1px solid var(--border-light);
+      color: var(--text); border-bottom-left-radius: 4px;
+    }
+    .chat-msg.system .bubble {
+      background: var(--warning-bg); color: var(--warning);
+      font-size: 12px; border-radius: 8px;
+    }
+    .chat-input-area {
+      border-top: 1px solid var(--border-light);
+      padding: 12px 16px; display: flex; gap: 10px; align-items: flex-end;
+    }
+    .chat-input-area textarea {
+      flex: 1; border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 12px; font-size: 14px; outline: none; resize: none;
+      min-height: 42px; max-height: 120px; font-family: var(--font-sans); line-height: 1.4;
+    }
+    .chat-input-area textarea:focus { border-color: var(--primary); }
+    .chat-send-btn {
+      height: 42px; min-width: 42px; border: none; border-radius: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.15s;
+    }
+    .chat-send-btn:hover { opacity: 0.85; }
+    .chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .typing-indicator { display: inline-flex; gap: 4px; padding: 6px 0; }
+    .typing-indicator span {
+      width: 7px; height: 7px; background: var(--muted); border-radius: 50%;
+      animation: bounce 1.2s infinite; opacity: 0.4;
+    }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+      40% { transform: translateY(-6px); opacity: 1; }
+    }
+
+    .model-star { color: var(--star); font-size: 13px; margin-left: 2px; }
+
+    .endpoint-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); margin-bottom: 8px; box-shadow: var(--shadow); overflow: hidden;
+    }
     .endpoint-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
-      cursor: pointer;
-      user-select: none;
-      transition: background 0.1s;
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 14px; cursor: pointer; user-select: none; transition: background 0.1s;
     }
     .endpoint-header:hover { background: #f6f8fa; }
     .method-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 56px;
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 0.3px;
-      text-transform: uppercase;
-      flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 52px; padding: 3px 8px; border-radius: 4px;
+      font-size: 11px; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase; flex-shrink: 0;
     }
     .method-get { background: var(--get-bg); color: var(--get-color); border: 1px solid var(--get-border); }
     .method-post { background: var(--post-bg); color: var(--post-color); border: 1px solid var(--post-border); }
-    .endpoint-path {
-      font-family: var(--font-mono);
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      flex: 1;
-    }
-    .endpoint-desc {
-      font-size: 13px;
-      color: var(--muted);
-      margin-left: auto;
-      text-align: right;
-      white-space: nowrap;
-    }
-    .endpoint-toggle {
-      font-size: 18px;
-      color: var(--muted);
-      transition: transform 0.2s;
-      flex-shrink: 0;
-    }
+    .endpoint-path { font-family: var(--font-mono); font-size: 13px; font-weight: 600; flex: 1; }
+    .endpoint-desc { font-size: 12px; color: var(--muted); margin-left: auto; text-align: right; white-space: nowrap; }
+    .endpoint-toggle { font-size: 16px; color: var(--muted); transition: transform 0.2s; flex-shrink: 0; }
     .endpoint-card.open .endpoint-toggle { transform: rotate(180deg); }
-
-    .endpoint-body {
-      display: none;
-      border-top: 1px solid var(--border-light);
-      padding: 16px;
-    }
+    .endpoint-body { display: none; border-top: 1px solid var(--border-light); padding: 14px; }
     .endpoint-card.open .endpoint-body { display: block; }
 
-    .form-group { margin-bottom: 12px; }
-    .form-group label {
-      display: block;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--muted);
-      margin-bottom: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
+    .form-group { margin-bottom: 10px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; border: 1px solid var(--border); border-radius: 6px;
+      padding: 7px 10px; font-size: 12px; outline: none; font-family: var(--font-mono);
     }
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 8px 10px;
-      font-size: 13px;
-      outline: none;
-      transition: border-color 0.15s;
-      font-family: var(--font-mono);
-    }
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus { border-color: var(--primary); }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); }
     .form-group select { font-family: var(--font-sans); }
-    .form-group textarea { min-height: 120px; resize: vertical; }
-
-    .form-row { display: flex; gap: 12px; }
+    .form-group textarea { min-height: 100px; resize: vertical; }
+    .form-row { display: flex; gap: 10px; }
     .form-row .form-group { flex: 1; }
-    @media (max-width: 640px) { .form-row { flex-direction: column; } }
 
-    .execute-bar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .response-area {
-      margin-top: 16px;
-      display: none;
-    }
+    .response-area { margin-top: 12px; display: none; }
     .response-area.visible { display: block; }
-    .response-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 6px;
-      font-size: 13px;
-      font-weight: 700;
-    }
-    .status-code {
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 700;
-      font-family: var(--font-mono);
-    }
+    .response-header { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 12px; font-weight: 700; }
+    .status-code { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; font-family: var(--font-mono); }
     .status-2xx { background: var(--success-bg); color: var(--success); }
     .status-4xx, .status-5xx { background: var(--warning-bg); color: var(--warning); }
     .response-body {
-      background: #1e1e2e;
-      color: #cdd6f4;
-      border-radius: 6px;
-      padding: 14px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      line-height: 1.5;
-      overflow-x: auto;
-      max-height: 500px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      word-break: break-word;
+      background: #1e1e2e; color: #cdd6f4; border-radius: 6px;
+      padding: 12px; font-family: var(--font-mono); font-size: 11px; line-height: 1.5;
+      overflow-x: auto; max-height: 400px; overflow-y: auto; white-space: pre-wrap; word-break: break-word;
     }
     .response-body .json-key { color: #89b4fa; }
     .response-body .json-string { color: #a6e3a1; }
@@ -319,65 +239,25 @@
     .response-body .json-bool { color: #cba6f7; }
     .response-body .json-null { color: #6c7086; }
 
-    .spinner {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-    }
-    .spinner-dark {
-      border-color: rgba(0,0,0,0.1);
-      border-top-color: var(--primary);
-    }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(0,0,0,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.6s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .disclaimer {
-      margin: 24px 0;
-      padding: 14px 16px;
-      border: 1px solid #fad1d6;
-      border-left: 4px solid var(--warning);
-      background: #fff7f7;
-      border-radius: var(--radius);
-      font-size: 13px;
-      color: #6b1a20;
+      margin: 16px 0; padding: 12px 14px;
+      border: 1px solid #fad1d6; border-left: 4px solid var(--warning);
+      background: #fff7f7; border-radius: var(--radius); font-size: 12px; color: #6b1a20;
     }
     .disclaimer strong { color: #8b1c24; }
 
-    footer {
-      text-align: center;
-      padding: 24px 0;
-      color: var(--subtle);
-      font-size: 13px;
-      border-top: 1px solid var(--border-light);
-      margin-top: 24px;
-    }
-
-    .loading-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(255,255,255,0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: var(--radius);
-      z-index: 10;
-    }
+    footer { text-align: center; padding: 20px 0; color: var(--subtle); font-size: 12px; border-top: 1px solid var(--border-light); margin-top: 20px; }
 
     @media (max-width: 640px) {
-      header h1 { font-size: 22px; }
+      header h1 { font-size: 20px; }
       .endpoint-desc { display: none; }
-      .container { padding: 0 14px; }
-      .endpoint-header { padding: 10px 12px; gap: 8px; }
-      .method-badge { min-width: 44px; font-size: 11px; padding: 3px 6px; }
-      .endpoint-path { font-size: 12px; }
-    }
-
-    .optgroup-label {
-      font-weight: 700;
-      color: var(--text);
+      .container { padding: 0 12px; }
+      .chat-header { flex-direction: column; align-items: flex-start; }
+      .chat-header select { max-width: 100%; }
+      .form-row { flex-direction: column; }
     }
   </style>
 </head>
@@ -386,7 +266,7 @@
   <header>
     <div class="container">
       <h1>Kimi Free API Explorer</h1>
-      <p>Interactive API documentation & testing interface. Compatible with OpenAI, Claude, and Gemini formats.</p>
+      <p>Interactive API documentation & testing. Compatible with OpenAI, Claude, and Gemini formats.</p>
       <div class="base-url-box">
         <span class="label">Base URL</span>
         <span class="url" id="baseUrl">Loading...</span>
@@ -396,467 +276,383 @@
 
   <main class="container">
     <div class="disclaimer">
-      <strong>Disclaimer:</strong> This is a reverse-engineered API and may be unstable. It is recommended to use the official paid API for production use. This project is for research and learning purposes only, not for commercial use.
+      <strong>Disclaimer:</strong> API reverse-engineer bersifat tidak stabil. Disarankan menggunakan API resmi berbayar untuk produksi. Project ini hanya untuk riset dan pembelajaran, dilarang untuk komersial.
     </div>
 
     <section class="section" id="auth-section">
-      <div class="section-title">
-        <span class="section-icon">&#128274;</span>
-        Authentication
-      </div>
-      <div class="auth-card">
-        <label for="cookieInput">Paste full cookie string or kimi-auth JWT token</label>
-        <textarea id="cookieInput" placeholder='Paste cookies like: _ga=...; kimi-auth=eyJhbGci... &#10;Or just the JWT token: eyJhbGci...'></textarea>
-        <div class="auth-actions">
-          <button class="btn btn-primary" onclick="extractToken()">Extract & Save Token</button>
-          <button class="btn" onclick="loadSavedToken()">Load Saved</button>
-          <button class="btn btn-danger" onclick="clearToken()">Clear Token</button>
+      <div class="section-title">&#128274; Kimi Auth Token</div>
+      <div class="card">
+        <label>Paste full cookie string atau kimi-auth JWT token</label>
+        <textarea id="cookieInput" placeholder="Paste cookies: _ga=...; kimi-auth=eyJhbGci...&#10;Atau langsung JWT token: eyJhbGci..."
+          style="min-height:60px;"></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="saveTokenToServer()">Save ke Server</button>
+          <button class="btn btn-sm" onclick="loadServerStatus()">Cek Status Token</button>
+          <button class="btn btn-danger btn-sm" onclick="clearServerToken()">Hapus Token</button>
         </div>
         <div class="token-info" id="tokenInfo">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <strong>Token Status:</strong>
+            <strong>Status:</strong>
             <span class="token-status" id="tokenStatus"></span>
           </div>
-          <div class="token-preview" id="tokenPreview"></div>
+          <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:4px;word-break:break-all;" id="tokenPreview"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="chat-section">
+      <div class="section-title">&#128172; Chat Test</div>
+      <div class="chat-box">
+        <div class="chat-header">
+          <h3>Chat AI</h3>
+          <select id="chatModel"></select>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-msg system"><div class="bubble">Pilih model dan tulis pesan untuk mulai chat. Token harus disimpan dulu di bagian Auth di atas.</div></div>
+        </div>
+        <div class="chat-input-area">
+          <textarea id="chatInput" placeholder="Tulis pesan di sini..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"></textarea>
+          <button class="chat-send-btn" id="chatSendBtn" onclick="sendChat()" title="Kirim">&#9654;</button>
         </div>
       </div>
     </section>
 
     <section class="section" id="api-section">
-      <div class="section-title">
-        <span class="section-icon">&#128640;</span>
-        API Endpoints
-      </div>
+      <div class="section-title">&#128640; API Endpoints</div>
       <div id="endpointList"></div>
     </section>
   </main>
 
   <footer>
-    <div class="container">
-      Kimi Free API Explorer &mdash; Built for developers
-    </div>
+    <div class="container">Kimi Free API Explorer &mdash; 16 Model AI (K2.5, K2, Moonshot, Vision)</div>
   </footer>
 
   <script>
     const BASE_URL = window.location.origin;
     document.getElementById('baseUrl').textContent = BASE_URL;
 
-    const MODELS = {
-      'K2.5': ['kimi-k2.5-instant', 'kimi-k2.5-thinking', 'kimi-k2.5-agent', 'kimi-k2.5-agent-swarm'],
-      'K2': ['kimi-k2-0905-preview', 'kimi-k2-0711-preview', 'kimi-k2-turbo-preview', 'kimi-k2-thinking', 'kimi-k2-thinking-turbo'],
-      'Moonshot': ['moonshot-v1-8k', 'moonshot-v1-32k', 'moonshot-v1-128k'],
-      'Vision': ['moonshot-v1-8k-vision-preview', 'moonshot-v1-32k-vision-preview', 'moonshot-v1-128k-vision-preview'],
-      'Latest': ['kimi-latest']
+    const STARRED_MODELS = ['kimi-k2.5-thinking', 'kimi-k2.5-agent', 'kimi-k2-0905-preview', 'kimi-k2-thinking'];
+
+    const MODELS_DATA = {
+      'K2.5 Series (Terbaru)': [
+        { id: 'kimi-k2.5-instant', label: 'K2.5 Instant', desc: 'Quick response, 3-8s' },
+        { id: 'kimi-k2.5-thinking', label: 'K2.5 Thinking', desc: 'Deep thinking, complex questions', starred: true },
+        { id: 'kimi-k2.5-agent', label: 'K2.5 Agent', desc: 'Research, slides, docs', starred: true },
+        { id: 'kimi-k2.5-agent-swarm', label: 'K2.5 Agent Swarm', desc: '100 parallel sub-agents' },
+      ],
+      'K2 Series': [
+        { id: 'kimi-k2-0905-preview', label: 'K2-0905', desc: '256k, Agentic Coding', starred: true },
+        { id: 'kimi-k2-0711-preview', label: 'K2-0711', desc: '128k, 1T MoE' },
+        { id: 'kimi-k2-turbo-preview', label: 'K2-Turbo', desc: '60-100 tokens/s' },
+        { id: 'kimi-k2-thinking', label: 'K2-Thinking', desc: 'Deep reasoning', starred: true },
+        { id: 'kimi-k2-thinking-turbo', label: 'K2-Thinking-Turbo', desc: 'Fast deep reasoning' },
+      ],
+      'Moonshot V1': [
+        { id: 'moonshot-v1-8k', label: 'Moonshot-8K', desc: '8k context' },
+        { id: 'moonshot-v1-32k', label: 'Moonshot-32K', desc: '32k context' },
+        { id: 'moonshot-v1-128k', label: 'Moonshot-128K', desc: '128k context' },
+      ],
+      'Vision': [
+        { id: 'moonshot-v1-8k-vision-preview', label: 'Vision-8K', desc: 'Image+text 8k' },
+        { id: 'moonshot-v1-32k-vision-preview', label: 'Vision-32K', desc: 'Image+text 32k' },
+        { id: 'moonshot-v1-128k-vision-preview', label: 'Vision-128K', desc: 'Image+text 128k' },
+      ],
+      'Latest': [
+        { id: 'kimi-latest', label: 'Kimi-Latest', desc: 'Latest model 128k' },
+      ]
     };
 
-    let fetchedModels = null;
-
-    const ENDPOINTS = [
-      {
-        method: 'GET', path: '/ping', desc: 'Health check',
-        hasBody: false, hasModel: false, hasAuth: false
-      },
-      {
-        method: 'GET', path: '/v1/models', desc: 'List available models',
-        hasBody: false, hasModel: false, hasAuth: false
-      },
-      {
-        method: 'POST', path: '/v1/chat/completions', desc: 'Chat completion (OpenAI format)',
-        hasBody: true, hasModel: true, hasAuth: true, hasStream: true,
-        defaultBody: {
-          model: 'kimi-k2.5-instant',
-          messages: [{ role: 'user', content: 'Hello' }],
-          stream: false
+    function buildModelOptions(selectId) {
+      const sel = document.getElementById(selectId);
+      if (!sel) return;
+      sel.innerHTML = '';
+      for (const [group, models] of Object.entries(MODELS_DATA)) {
+        const og = document.createElement('optgroup');
+        og.label = group;
+        for (const m of models) {
+          const opt = document.createElement('option');
+          opt.value = m.id;
+          opt.textContent = m.label + (m.starred ? ' \u2B50' : '') + ' \u2014 ' + m.desc;
+          og.appendChild(opt);
         }
-      },
-      {
-        method: 'POST', path: '/v1/messages', desc: 'Chat completion (Claude format)',
-        hasBody: true, hasModel: true, hasAuth: true, hasStream: true,
-        defaultBody: {
-          model: 'kimi-k2.5-instant',
-          max_tokens: 1024,
-          messages: [{ role: 'user', content: 'Hello' }],
-          stream: false
-        }
-      },
-      {
-        method: 'POST', path: '/v1beta/models/:model:generateContent', desc: 'Content generation (Gemini format)',
-        hasBody: true, hasModel: true, hasAuth: true, hasModelInPath: true,
-        defaultBody: {
-          contents: [{ parts: [{ text: 'Hello' }] }]
-        }
-      },
-      {
-        method: 'POST', path: '/v1beta/models/:model:streamGenerateContent', desc: 'Streaming content (Gemini format)',
-        hasBody: true, hasModel: true, hasAuth: true, hasModelInPath: true,
-        defaultBody: {
-          contents: [{ parts: [{ text: 'Hello' }] }]
-        }
-      },
-      {
-        method: 'GET', path: '/v1beta/models', desc: 'List Gemini models',
-        hasBody: false, hasModel: false, hasAuth: false
-      },
-      {
-        method: 'POST', path: '/token/check', desc: 'Check token validity',
-        hasBody: true, hasModel: false, hasAuth: false,
-        defaultBody: { token: '' }
-      },
-      {
-        method: 'POST', path: '/auth/extract', desc: 'Extract kimi-auth from cookies',
-        hasBody: true, hasModel: false, hasAuth: false,
-        defaultBody: { cookie: '_ga=...; kimi-auth=eyJ...' }
+        sel.appendChild(og);
       }
-    ];
-
-    function getToken() {
-      return localStorage.getItem('kimi_auth_token') || '';
     }
 
     function decodeJWT(token) {
       try {
         const parts = token.split('.');
         if (parts.length !== 3) return null;
-        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-        return payload;
+        return JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
       } catch { return null; }
     }
 
-    function extractToken() {
-      const input = document.getElementById('cookieInput').value.trim();
-      if (!input) return;
+    function showTokenStatus(info, isServer) {
+      const el = document.getElementById('tokenInfo');
+      const st = document.getElementById('tokenStatus');
+      const pr = document.getElementById('tokenPreview');
+      el.classList.add('visible');
 
-      let token = '';
-      if (input.startsWith('eyJ')) {
-        token = input.split(';')[0].trim();
-      } else {
-        const match = input.match(/kimi-auth=([^;\s]+)/);
-        if (match) {
-          token = match[1];
-        } else {
-          const jwtMatch = input.match(/(eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)/);
-          if (jwtMatch) token = jwtMatch[1];
-        }
-      }
-
-      if (!token) {
-        alert('Could not find a valid JWT token. Please paste a cookie string containing kimi-auth or a JWT token starting with eyJ...');
+      if (info.has_token === false) {
+        st.className = 'token-status token-unknown';
+        st.textContent = 'Belum ada token di server';
+        pr.textContent = '';
         return;
       }
 
-      localStorage.setItem('kimi_auth_token', token);
-      showTokenInfo(token);
-      updateAuthFields();
-    }
-
-    function loadSavedToken() {
-      const token = getToken();
-      if (token) {
-        document.getElementById('cookieInput').value = token;
-        showTokenInfo(token);
+      const ti = info.token_info || info;
+      if (ti.is_expired === false) {
+        st.className = 'token-status token-valid';
+        st.textContent = '\u2713 Valid \u2014 Expires: ' + new Date(ti.expires_at).toLocaleString();
+      } else if (ti.is_expired === true) {
+        st.className = 'token-status token-expired';
+        st.textContent = '\u2717 Expired: ' + new Date(ti.expires_at).toLocaleString();
       } else {
-        alert('No saved token found.');
+        st.className = 'token-status token-unknown';
+        st.textContent = 'Status tidak diketahui';
       }
+      pr.textContent = info.token_preview || (ti.user_id ? 'User: ' + ti.user_id + ' | Region: ' + (ti.region || '-') + ' | Level: ' + (ti.membership_level || '-') : '');
     }
 
-    function clearToken() {
-      localStorage.removeItem('kimi_auth_token');
-      document.getElementById('cookieInput').value = '';
-      document.getElementById('tokenInfo').classList.remove('visible');
-      updateAuthFields();
-    }
-
-    function showTokenInfo(token) {
-      const info = document.getElementById('tokenInfo');
-      const status = document.getElementById('tokenStatus');
-      const preview = document.getElementById('tokenPreview');
-
-      info.classList.add('visible');
-      preview.textContent = token.substring(0, 80) + (token.length > 80 ? '...' : '');
-
-      const payload = decodeJWT(token);
-      if (payload && payload.exp) {
-        const expDate = new Date(payload.exp * 1000);
-        const now = new Date();
-        if (expDate > now) {
-          status.className = 'token-status token-valid';
-          status.textContent = '\u2713 Valid \u2014 Expires: ' + expDate.toLocaleString();
+    async function saveTokenToServer() {
+      const input = document.getElementById('cookieInput').value.trim();
+      if (!input) { alert('Paste cookie string atau JWT token dulu.'); return; }
+      try {
+        const res = await fetch(BASE_URL + '/auth/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cookies: input })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showTokenStatus(data, true);
+          alert('Token berhasil disimpan ke server! Semua API call akan otomatis pakai token ini.');
         } else {
-          status.className = 'token-status token-expired';
-          status.textContent = '\u2717 Expired: ' + expDate.toLocaleString();
+          alert('Gagal: ' + (data.error || 'Unknown error'));
+          if (data.token_info) showTokenStatus({ token_info: data.token_info }, true);
         }
-      } else {
-        status.className = 'token-status token-unknown';
-        status.textContent = 'Token saved (expiry unknown)';
-      }
+      } catch (e) { alert('Error: ' + e.message); }
     }
 
-    function updateAuthFields() {
-      const token = getToken();
-      document.querySelectorAll('.auth-input').forEach(el => {
-        el.value = token ? 'Bearer ' + token : '';
-      });
+    async function loadServerStatus() {
+      try {
+        const res = await fetch(BASE_URL + '/auth/status');
+        const data = await res.json();
+        showTokenStatus(data, true);
+      } catch (e) { alert('Error: ' + e.message); }
     }
 
-    function buildModelSelect(id) {
-      let html = '<select id="' + id + '" class="model-select" style="font-family:var(--font-sans)">';
-      for (const [group, models] of Object.entries(MODELS)) {
-        html += '<optgroup label="' + group + '">';
-        for (const m of models) {
-          html += '<option value="' + m + '">' + m + '</option>';
-        }
-        html += '</optgroup>';
-      }
-      html += '</select>';
-      return html;
+    async function clearServerToken() {
+      try {
+        await fetch(BASE_URL + '/auth/clear');
+        document.getElementById('tokenInfo').classList.remove('visible');
+        document.getElementById('cookieInput').value = '';
+        alert('Token di server berhasil dihapus.');
+      } catch (e) { alert('Error: ' + e.message); }
     }
+
+    let chatBusy = false;
+
+    function addChatMessage(role, content) {
+      const container = document.getElementById('chatMessages');
+      const div = document.createElement('div');
+      div.className = 'chat-msg ' + role;
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.textContent = content;
+      div.appendChild(bubble);
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+      return bubble;
+    }
+
+    function addTypingIndicator() {
+      const container = document.getElementById('chatMessages');
+      const div = document.createElement('div');
+      div.className = 'chat-msg assistant';
+      div.id = 'typingIndicator';
+      div.innerHTML = '<div class="bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      const el = document.getElementById('typingIndicator');
+      if (el) el.remove();
+    }
+
+    async function sendChat() {
+      if (chatBusy) return;
+      const input = document.getElementById('chatInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      const model = document.getElementById('chatModel').value;
+      input.value = '';
+      addChatMessage('user', msg);
+
+      chatBusy = true;
+      document.getElementById('chatSendBtn').disabled = true;
+      addTypingIndicator();
+
+      try {
+        const res = await fetch(BASE_URL + '/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: model,
+            messages: [{ role: 'user', content: msg }],
+            stream: false
+          })
+        });
+
+        removeTypingIndicator();
+
+        if (!res.ok) {
+          const err = await res.text();
+          let errMsg = 'Error ' + res.status;
+          try { const j = JSON.parse(err); errMsg = j.message || j.error || errMsg; } catch {}
+          addChatMessage('system', errMsg);
+        } else {
+          const data = await res.json();
+          const reply = data.choices?.[0]?.message?.content || data.choices?.[0]?.text || JSON.stringify(data);
+          addChatMessage('assistant', reply);
+        }
+      } catch (e) {
+        removeTypingIndicator();
+        addChatMessage('system', 'Request failed: ' + e.message);
+      }
+
+      chatBusy = false;
+      document.getElementById('chatSendBtn').disabled = false;
+    }
+
+    const ENDPOINTS = [
+      { method: 'GET', path: '/ping', desc: 'Health check', hasBody: false, hasModel: false, hasAuth: false },
+      { method: 'GET', path: '/v1/models', desc: 'Daftar 16 model AI', hasBody: false, hasModel: false, hasAuth: false },
+      { method: 'GET', path: '/v1beta/models', desc: 'Daftar model Gemini', hasBody: false, hasModel: false, hasAuth: false },
+      { method: 'GET', path: '/auth/status', desc: 'Status token di server', hasBody: false, hasModel: false, hasAuth: false },
+      {
+        method: 'POST', path: '/v1/messages', desc: 'Chat (Claude format)',
+        hasBody: true, hasModel: true, hasAuth: false,
+        defaultBody: { model: 'kimi-k2.5-instant', max_tokens: 1024, messages: [{ role: 'user', content: 'Hello' }], stream: false }
+      },
+      {
+        method: 'POST', path: '/v1beta/models/:model:generateContent', desc: 'Generate (Gemini format)',
+        hasBody: true, hasModel: true, hasAuth: false, hasModelInPath: true,
+        defaultBody: { contents: [{ parts: [{ text: 'Hello' }] }] }
+      },
+      {
+        method: 'POST', path: '/token/check', desc: 'Cek validitas token',
+        hasBody: true, hasModel: false, hasAuth: false,
+        defaultBody: { token: '' }
+      },
+      {
+        method: 'POST', path: '/auth/extract', desc: 'Extract kimi-auth dari cookies',
+        hasBody: true, hasModel: false, hasAuth: false,
+        defaultBody: { cookies: '_ga=...; kimi-auth=eyJ...' }
+      },
+      {
+        method: 'POST', path: '/auth/save', desc: 'Simpan token ke server',
+        hasBody: true, hasModel: false, hasAuth: false,
+        defaultBody: { cookies: 'paste_cookie_string_disini' }
+      }
+    ];
 
     function syntaxHighlight(json) {
       if (typeof json !== 'string') json = JSON.stringify(json, null, 2);
       return json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/("(\\u[a-fA-F0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?)/g, function(match) {
           let cls = 'json-string';
-          if (/:$/.test(match)) {
-            cls = 'json-key';
-            return '<span class="' + cls + '">' + match.slice(0, -1) + '</span>:';
-          }
-          return '<span class="' + cls + '">' + match + '</span>';
+          if (/:$/.test(match)) { cls = 'json-key'; return '<span class="'+cls+'">'+match.slice(0,-1)+'</span>:'; }
+          return '<span class="'+cls+'">'+match+'</span>';
         })
         .replace(/\b(true|false)\b/g, '<span class="json-bool">$1</span>')
         .replace(/\bnull\b/g, '<span class="json-null">null</span>')
         .replace(/\b(-?\d+\.?\d*([eE][+-]?\d+)?)\b/g, '<span class="json-number">$1</span>');
     }
 
-    function renderEndpoints() {
-      const container = document.getElementById('endpointList');
-      container.innerHTML = '';
+    function buildModelSelect2(id) {
+      let h = '<select id="'+id+'">';
+      for (const [g, ms] of Object.entries(MODELS_DATA)) {
+        h += '<optgroup label="'+g+'">';
+        for (const m of ms) { h += '<option value="'+m.id+'">'+m.label+(m.starred?' \u2B50':'')+' - '+m.desc+'</option>'; }
+        h += '</optgroup>';
+      }
+      h += '</select>';
+      return h;
+    }
 
-      ENDPOINTS.forEach((ep, idx) => {
+    function renderEndpoints() {
+      const c = document.getElementById('endpointList');
+      c.innerHTML = '';
+      ENDPOINTS.forEach((ep, i) => {
         const card = document.createElement('div');
         card.className = 'endpoint-card';
-        card.id = 'ep-' + idx;
-
-        const methodClass = ep.method === 'GET' ? 'method-get' : 'method-post';
-
-        let bodyHtml = '';
-        if (ep.hasBody || ep.hasModel || ep.hasAuth) {
-          bodyHtml += '<div class="endpoint-body">';
-
-          if (ep.hasAuth) {
-            bodyHtml += '<div class="form-group"><label>Authorization</label>';
-            bodyHtml += '<input type="text" class="auth-input" id="auth-' + idx + '" placeholder="Bearer your-token-here" value="' + (getToken() ? 'Bearer ' + getToken() : '') + '"/></div>';
-          }
-
-          if (ep.hasModel) {
-            bodyHtml += '<div class="form-row">';
-            bodyHtml += '<div class="form-group"><label>Model</label>' + buildModelSelect('model-' + idx) + '</div>';
-            if (ep.hasStream) {
-              bodyHtml += '<div class="form-group"><label>Streaming</label><select id="stream-' + idx + '"><option value="false">No</option><option value="true">Yes</option></select></div>';
-            }
-            bodyHtml += '</div>';
-          }
-
-          if (ep.hasBody) {
-            const body = ep.defaultBody ? JSON.stringify(ep.defaultBody, null, 2) : '{}';
-            bodyHtml += '<div class="form-group"><label>Request Body</label>';
-            bodyHtml += '<textarea id="body-' + idx + '">' + body + '</textarea></div>';
-          }
-
-          bodyHtml += '<div class="execute-bar">';
-          bodyHtml += '<button class="btn btn-primary" onclick="executeRequest(' + idx + ')">&#9654; Execute</button>';
-          bodyHtml += '<span id="loader-' + idx + '" style="display:none"><span class="spinner spinner-dark"></span></span>';
-          bodyHtml += '</div>';
-
-          bodyHtml += '<div class="response-area" id="response-' + idx + '">';
-          bodyHtml += '<div class="response-header">Response <span class="status-code" id="status-' + idx + '"></span></div>';
-          bodyHtml += '<pre class="response-body" id="respBody-' + idx + '"></pre>';
-          bodyHtml += '</div>';
-
-          bodyHtml += '</div>';
-        } else {
-          bodyHtml += '<div class="endpoint-body">';
-          bodyHtml += '<div class="execute-bar">';
-          bodyHtml += '<button class="btn btn-primary" onclick="executeRequest(' + idx + ')">&#9654; Execute</button>';
-          bodyHtml += '<span id="loader-' + idx + '" style="display:none"><span class="spinner spinner-dark"></span></span>';
-          bodyHtml += '</div>';
-          bodyHtml += '<div class="response-area" id="response-' + idx + '">';
-          bodyHtml += '<div class="response-header">Response <span class="status-code" id="status-' + idx + '"></span></div>';
-          bodyHtml += '<pre class="response-body" id="respBody-' + idx + '"></pre>';
-          bodyHtml += '</div>';
-          bodyHtml += '</div>';
+        card.id = 'ep-'+i;
+        const mc = ep.method === 'GET' ? 'method-get' : 'method-post';
+        let body = '<div class="endpoint-body">';
+        if (ep.hasModel) {
+          body += '<div class="form-group"><label>Model</label>'+buildModelSelect2('model-'+i)+'</div>';
         }
-
-        card.innerHTML = '<div class="endpoint-header" onclick="toggleEndpoint(' + idx + ')">' +
-          '<span class="method-badge ' + methodClass + '">' + ep.method + '</span>' +
-          '<span class="endpoint-path">' + ep.path + '</span>' +
-          '<span class="endpoint-desc">' + ep.desc + '</span>' +
-          '<span class="endpoint-toggle">&#9660;</span>' +
-          '</div>' + bodyHtml;
-
-        container.appendChild(card);
+        if (ep.hasBody) {
+          body += '<div class="form-group"><label>Request Body</label><textarea id="body-'+i+'">'+JSON.stringify(ep.defaultBody, null, 2)+'</textarea></div>';
+        }
+        body += '<div style="display:flex;gap:8px;align-items:center;margin-top:8px;">';
+        body += '<button class="btn btn-primary btn-sm" onclick="execEP('+i+')">&#9654; Execute</button>';
+        body += '<span id="loader-'+i+'" style="display:none"><span class="spinner"></span></span>';
+        body += '</div>';
+        body += '<div class="response-area" id="resp-'+i+'"><div class="response-header">Response <span class="status-code" id="st-'+i+'"></span></div><pre class="response-body" id="rb-'+i+'"></pre></div>';
+        body += '</div>';
+        card.innerHTML = '<div class="endpoint-header" onclick="toggleEP('+i+')"><span class="method-badge '+mc+'">'+ep.method+'</span><span class="endpoint-path">'+ep.path+'</span><span class="endpoint-desc">'+ep.desc+'</span><span class="endpoint-toggle">&#9660;</span></div>'+body;
+        c.appendChild(card);
       });
     }
 
-    function toggleEndpoint(idx) {
-      const card = document.getElementById('ep-' + idx);
-      card.classList.toggle('open');
-    }
+    function toggleEP(i) { document.getElementById('ep-'+i).classList.toggle('open'); }
 
-    async function executeRequest(idx) {
-      const ep = ENDPOINTS[idx];
-      const loader = document.getElementById('loader-' + idx);
-      const responseArea = document.getElementById('response-' + idx);
-      const statusEl = document.getElementById('status-' + idx);
-      const respBody = document.getElementById('respBody-' + idx);
-
+    async function execEP(i) {
+      const ep = ENDPOINTS[i];
+      const loader = document.getElementById('loader-'+i);
+      const ra = document.getElementById('resp-'+i);
+      const st = document.getElementById('st-'+i);
+      const rb = document.getElementById('rb-'+i);
       loader.style.display = 'inline-block';
-      responseArea.classList.remove('visible');
-
+      ra.classList.remove('visible');
       let url = BASE_URL + ep.path;
       const opts = { method: ep.method, headers: {} };
-
-      if (ep.hasAuth) {
-        const authVal = document.getElementById('auth-' + idx).value.trim();
-        if (authVal) opts.headers['Authorization'] = authVal;
-      }
-
       let bodyObj = null;
       if (ep.hasBody) {
-        try {
-          bodyObj = JSON.parse(document.getElementById('body-' + idx).value);
-        } catch(e) {
-          loader.style.display = 'none';
-          responseArea.classList.add('visible');
-          statusEl.className = 'status-code status-4xx';
-          statusEl.textContent = 'ERR';
-          respBody.textContent = 'Invalid JSON in request body: ' + e.message;
-          return;
-        }
+        try { bodyObj = JSON.parse(document.getElementById('body-'+i).value); }
+        catch(e) { loader.style.display='none'; ra.classList.add('visible'); st.className='status-code status-4xx'; st.textContent='ERR'; rb.textContent='Invalid JSON: '+e.message; return; }
       }
-
-      if (ep.hasModel) {
-        const model = document.getElementById('model-' + idx).value;
-        if (bodyObj) bodyObj.model = model;
-        if (ep.hasModelInPath) {
-          url = BASE_URL + ep.path.replace(':model', model);
-        }
+      if (ep.hasModel && bodyObj) {
+        const model = document.getElementById('model-'+i).value;
+        bodyObj.model = model;
+        if (ep.hasModelInPath) url = BASE_URL + ep.path.replace(':model', model);
       }
-
-      let isStream = false;
-      if (ep.hasStream) {
-        isStream = document.getElementById('stream-' + idx).value === 'true';
-        if (bodyObj) bodyObj.stream = isStream;
-      }
-
-      if (bodyObj) {
-        opts.headers['Content-Type'] = 'application/json';
-        opts.body = JSON.stringify(bodyObj);
-      }
-
+      if (bodyObj) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(bodyObj); }
       try {
         const res = await fetch(url, opts);
-        const statusCode = res.status;
-        statusEl.textContent = statusCode;
-        statusEl.className = 'status-code ' + (statusCode >= 200 && statusCode < 300 ? 'status-2xx' : statusCode >= 400 && statusCode < 500 ? 'status-4xx' : 'status-5xx');
-
-        if (isStream && res.ok) {
-          responseArea.classList.add('visible');
-          respBody.innerHTML = '';
-          const reader = res.body.getReader();
-          const decoder = new TextDecoder();
-          let accumulated = '';
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            const chunk = decoder.decode(value, { stream: true });
-            accumulated += chunk;
-            respBody.textContent = accumulated;
-            respBody.scrollTop = respBody.scrollHeight;
-          }
-        } else {
-          const text = await res.text();
-          let formatted;
-          try {
-            const json = JSON.parse(text);
-            formatted = syntaxHighlight(JSON.stringify(json, null, 2));
-          } catch {
-            formatted = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-          }
-          respBody.innerHTML = formatted;
-          responseArea.classList.add('visible');
-        }
+        st.textContent = res.status;
+        st.className = 'status-code '+(res.status>=200&&res.status<300?'status-2xx':res.status>=400&&res.status<500?'status-4xx':'status-5xx');
+        const text = await res.text();
+        let formatted;
+        try { formatted = syntaxHighlight(JSON.stringify(JSON.parse(text), null, 2)); } catch { formatted = text.replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+        rb.innerHTML = formatted;
+        ra.classList.add('visible');
       } catch(e) {
-        statusEl.className = 'status-code status-5xx';
-        statusEl.textContent = 'ERR';
-        respBody.textContent = 'Request failed: ' + e.message;
-        responseArea.classList.add('visible');
+        st.className = 'status-code status-5xx'; st.textContent = 'ERR';
+        rb.textContent = 'Request failed: '+e.message; ra.classList.add('visible');
       }
-
       loader.style.display = 'none';
     }
 
-    async function fetchModels() {
-      try {
-        const res = await fetch(BASE_URL + '/v1/models');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.data && Array.isArray(data.data)) {
-            fetchedModels = data.data.map(m => m.id || m);
-            updateModelSelects();
-          }
-        }
-      } catch {}
-    }
-
-    function updateModelSelects() {
-      if (!fetchedModels || fetchedModels.length === 0) return;
-      document.querySelectorAll('.model-select').forEach(sel => {
-        const currentVal = sel.value;
-        sel.innerHTML = '';
-
-        for (const [group, models] of Object.entries(MODELS)) {
-          const optgroup = document.createElement('optgroup');
-          optgroup.label = group;
-          for (const m of models) {
-            const opt = document.createElement('option');
-            opt.value = m;
-            opt.textContent = m;
-            optgroup.appendChild(opt);
-          }
-          sel.appendChild(optgroup);
-        }
-
-        const extraModels = fetchedModels.filter(fm => {
-          return !Object.values(MODELS).flat().includes(fm);
-        });
-        if (extraModels.length > 0) {
-          const optgroup = document.createElement('optgroup');
-          optgroup.label = 'Other (from API)';
-          for (const m of extraModels) {
-            const opt = document.createElement('option');
-            opt.value = m;
-            opt.textContent = m;
-            optgroup.appendChild(opt);
-          }
-          sel.appendChild(optgroup);
-        }
-
-        if (currentVal && [...sel.options].some(o => o.value === currentVal)) {
-          sel.value = currentVal;
-        }
-      });
-    }
-
     function init() {
+      buildModelOptions('chatModel');
       renderEndpoints();
-      const saved = getToken();
-      if (saved) {
-        showTokenInfo(saved);
-      }
-      fetchModels();
+      loadServerStatus();
     }
-
     init();
   </script>
 </body>

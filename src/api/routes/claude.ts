@@ -3,6 +3,7 @@ import _ from 'lodash';
 import Request from '@/lib/request/Request.ts';
 import Response from '@/lib/response/Response.ts';
 import { createClaudeCompletion } from '@/api/controllers/claude-adapter.ts';
+import { getServerToken } from '@/api/routes/auth.ts';
 
 export default {
 
@@ -93,26 +94,17 @@ export default {
                 .validate('body.stream', v => _.isUndefined(v) || _.isBoolean(v))
                 .validate('body.system', v => _.isUndefined(v) || _.isString(v) || _.isArray(v));
 
-            // Get token from Authorization header (handle case insensitive), x-goog-api-key or x-api-key header
             const authHeader = request.headers.authorization || request.headers.Authorization || request.headers['authorization'];
             const apiKeyHeader = request.headers['x-goog-api-key'] || request.headers['x-api-key'];
-
-            // Debug logging
-            console.log('DEBUG: All headers:', JSON.stringify(request.headers, null, 2));
-            console.log('DEBUG: Auth header found:', authHeader);
-            console.log('DEBUG: API key found:', apiKeyHeader);
-
-            // Try Authorization header first, then x-goog-api-key or x-api-key
             let tokenHeader = authHeader;
             if (!tokenHeader && apiKeyHeader) {
                 tokenHeader = `Bearer ${apiKeyHeader}`;
             }
-
             if (!tokenHeader) {
-                throw new Error('Missing Authorization header, x-goog-api-key, or x-api-key. Please provide Bearer JWT token.');
+                const st = getServerToken();
+                if (st) tokenHeader = `Bearer ${st}`;
+                else throw new Error('No token provided. Save a Kimi Auth token first or provide Authorization header.');
             }
-
-            // Remove Bearer prefix if present
             const authToken = tokenHeader.replace(/^Bearer\s+/i, '').trim();
 
             const { model, messages, system, stream } = request.body;

@@ -4,6 +4,7 @@ import Request from '@/lib/request/Request.ts';
 import Response from '@/lib/response/Response.ts';
 import chat from '@/api/controllers/chat.ts';
 import { createCompletionV2, createCompletionStreamV2, detectTokenType } from '@/api/controllers/chat-v2.ts';
+import { getServerToken } from '@/api/routes/auth.ts';
 import logger from '@/lib/logger.ts';
 
 export default {
@@ -16,10 +17,19 @@ export default {
             request
                 .validate('body.conversation_id', v => _.isUndefined(v) || _.isString(v))
                 .validate('body.messages', _.isArray)
-                .validate('headers.authorization', _.isString)
 
-            // 提取 token (handle case insensitive)
-            const authHeader = request.headers.authorization || request.headers.Authorization || request.headers['authorization'];
+            let authHeader = request.headers.authorization || request.headers.Authorization || request.headers['authorization'];
+
+            if (!authHeader || authHeader === 'Bearer' || authHeader.trim() === '') {
+                const serverToken = getServerToken();
+                if (serverToken) {
+                    authHeader = `Bearer ${serverToken}`;
+                    logger.info('Using server-saved token for request');
+                } else {
+                    throw new Error('No token provided. Please save a Kimi Auth token first via the website or provide Authorization header.');
+                }
+            }
+
             const token = authHeader.replace(/^Bearer\s+/i, '').trim();
 
             // 检测 token 类型

@@ -3,6 +3,7 @@ import _ from 'lodash';
 import Request from '@/lib/request/Request.ts';
 import Response from '@/lib/response/Response.ts';
 import { createGeminiCompletion } from '@/api/controllers/gemini-adapter.ts';
+import { getServerToken } from '@/api/routes/auth.ts';
 
 export default {
 
@@ -57,18 +58,14 @@ export default {
                 .validate('body.contents', _.isArray)
                 .validate('body.systemInstruction', v => _.isUndefined(v) || _.isObject(v) || _.isString(v));
 
-            // Get token from Authorization header (handle case insensitive) or x-goog-api-key header
             const authHeader = request.headers.authorization || request.headers.Authorization || request.headers['authorization'];
             const apiKey = request.headers['x-goog-api-key'];
-
-            // Try Authorization header first, then x-goog-api-key
-            const tokenHeader = authHeader || apiKey;
-
+            let tokenHeader = authHeader || apiKey;
             if (!tokenHeader) {
-                throw new Error('Missing Authorization header or x-goog-api-key. Please provide Bearer JWT token.');
+                const st = getServerToken();
+                if (st) tokenHeader = `Bearer ${st}`;
+                else throw new Error('No token provided. Save a Kimi Auth token first or provide Authorization header.');
             }
-
-            // Remove Bearer prefix if present
             const authToken = tokenHeader.replace(/^Bearer\s+/i, '').trim();
 
             const model = request.params.model || 'gemini-pro';
@@ -84,29 +81,19 @@ export default {
             return geminiResponse;
         },
 
-        // Gemini streamGenerateContent endpoint
         '/models/:model\\:streamGenerateContent': async (request: Request) => {
             request
                 .validate('body.contents', _.isArray)
                 .validate('body.systemInstruction', v => _.isUndefined(v) || _.isObject(v) || _.isString(v));
 
-            // Debug: Log all headers to understand the issue
-            console.log('DEBUG: All headers:', JSON.stringify(request.headers, null, 2));
-            
-            // Get token from Authorization header (handle case insensitive) or x-goog-api-key header
             const authHeader = request.headers.authorization || request.headers.Authorization || request.headers['authorization'];
             const apiKey = request.headers['x-goog-api-key'];
-            console.log('DEBUG: Auth header found:', authHeader);
-            console.log('DEBUG: API key found:', apiKey);
-
-            // Try Authorization header first, then x-goog-api-key
-            const tokenHeader = authHeader || apiKey;
-
+            let tokenHeader = authHeader || apiKey;
             if (!tokenHeader) {
-                throw new Error('Missing Authorization header or x-goog-api-key. Please provide Bearer JWT token.');
+                const st = getServerToken();
+                if (st) tokenHeader = `Bearer ${st}`;
+                else throw new Error('No token provided. Save a Kimi Auth token first or provide Authorization header.');
             }
-
-            // Remove Bearer prefix if present
             const authToken = tokenHeader.replace(/^Bearer\s+/i, '').trim();
 
             const model = request.params.model || 'gemini-pro';

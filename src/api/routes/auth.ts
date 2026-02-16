@@ -1,5 +1,45 @@
 import _ from 'lodash';
 import Request from '@/lib/request/Request.ts';
+import logger from '@/lib/logger.ts';
+
+let serverToken = '';
+let serverTokenInfo: any = null;
+
+export function getServerToken(): string {
+    return serverToken;
+}
+
+function decodeToken(token: string): any {
+    try {
+        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+        return {
+            valid: true,
+            app_id: payload.app_id,
+            type: payload.typ,
+            user_id: payload.sub,
+            space_id: payload.space_id,
+            device_id: payload.device_id,
+            region: payload.region,
+            issued_at: payload.iat ? new Date(payload.iat * 1000).toISOString() : null,
+            expires_at: payload.exp ? new Date(payload.exp * 1000).toISOString() : null,
+            is_expired: payload.exp ? (Date.now() / 1000) > payload.exp : null,
+            membership_level: payload.membership?.level
+        };
+    } catch (e) {
+        return { valid: false, error: 'Failed to decode JWT payload' };
+    }
+}
+
+function extractKimiAuth(input: string): string {
+    let kimiAuth = '';
+    const match = input.match(/kimi-auth=([^;\s]+)/);
+    if (match && match[1]) {
+        kimiAuth = match[1].trim();
+    } else if (input.trim().startsWith('eyJ') && input.trim().split('.').length === 3) {
+        kimiAuth = input.trim();
+    }
+    return kimiAuth;
+}
 
 export default {
 
@@ -9,15 +49,7 @@ export default {
         '/extract': async (request: Request) => {
             request.validate('body.cookies', _.isString);
 
-            const cookieString = request.body.cookies;
-            let kimiAuth = '';
-
-            const match = cookieString.match(/kimi-auth=([^;]+)/);
-            if (match && match[1]) {
-                kimiAuth = match[1].trim();
-            } else if (cookieString.startsWith('eyJ') && cookieString.split('.').length === 3) {
-                kimiAuth = cookieString.trim();
-            }
+            const kimiAuth = extractKimiAuth(request.body.cookies);
 
             if (!kimiAuth) {
                 return {
@@ -26,30 +58,73 @@ export default {
                 };
             }
 
-            let tokenInfo: any = { valid: false };
-            try {
-                const payload = JSON.parse(Buffer.from(kimiAuth.split('.')[1], 'base64').toString());
-                tokenInfo = {
-                    valid: true,
-                    app_id: payload.app_id,
-                    type: payload.typ,
-                    user_id: payload.sub,
-                    space_id: payload.space_id,
-                    device_id: payload.device_id,
-                    region: payload.region,
-                    issued_at: payload.iat ? new Date(payload.iat * 1000).toISOString() : null,
-                    expires_at: payload.exp ? new Date(payload.exp * 1000).toISOString() : null,
-                    is_expired: payload.exp ? (Date.now() / 1000) > payload.exp : null,
-                    membership_level: payload.membership?.level
-                };
-            } catch (e) {
-                tokenInfo = { valid: false, error: 'Failed to decode JWT payload' };
-            }
+            const tokenInfo = decodeToken(kimiAuth);
 
             return {
                 success: true,
                 token: kimiAuth,
                 token_info: tokenInfo
+            };
+        },
+
+        '/save': async (request: Request) => {
+            request.validate('body.cookies', _.isString);
+
+            const kimiAuth = extractKimiAuth(request.body.cookies);
+
+            if (!kimiAuth) {
+                return {
+                    success: false,
+                    error: 'No kimi-auth token found'
+                };
+            }
+
+            const tokenInfo = decodeToken(kimiAuth);
+
+            if (tokenInfo.is_expired) {
+                return {
+                    success: false,
+                    error: 'Token is already expired',
+                    token_info: tokenInfo
+                };
+            }
+
+            serverToken = kimiAuth;
+            serverTokenInfo = tokenInfo;
+            logger.success('Server token saved successfully');
+
+            return {
+                success: true,
+                message: 'Token saved to server. All API calls will use this token automatically.',
+                token_info: tokenInfo
+            };
+        }
+    },
+
+    get: {
+        '/status': async () => {
+            if (!serverToken) {
+                return {
+                    has_token: false,
+                    message: 'No token saved on server'
+                };
+            }
+
+            const tokenInfo = decodeToken(serverToken);
+            return {
+                has_token: true,
+                token_info: tokenInfo,
+                token_preview: serverToken.substring(0, 30) + '...'
+            };
+        },
+
+        '/clear': async () => {
+            serverToken = '';
+            serverTokenInfo = null;
+            logger.info('Server token cleared');
+            return {
+                success: true,
+                message: 'Server token cleared'
             };
         }
     }

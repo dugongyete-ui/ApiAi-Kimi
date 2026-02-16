@@ -106,28 +106,42 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 | `/v1beta/models/:model:streamGenerateContent` | POST | Streaming content (Gemini) | JWT |
 | `/token/check` | POST | Cek validitas token | refresh_token |
 
-### Endpoint Utility
+### Endpoint Token Management (Server-Side)
 | Endpoint | Method | Deskripsi | Status |
 |----------|--------|-----------|--------|
 | `/auth/extract` | POST | Extract kimi-auth dari cookie string | OK |
+| `/auth/save` | POST | Simpan token ke server (auto-used for all API calls) | OK |
+| `/auth/status` | GET | Cek status token di server (expiry, user info) | OK |
+| `/auth/clear` | GET | Hapus token dari server | OK |
+
+## Server-Side Token Management
+- Token disimpan di memory server via `/auth/save`
+- Semua endpoint (chat, gemini, claude) otomatis pakai server token jika tidak ada Authorization header
+- User cukup paste cookie/JWT sekali, semua API call otomatis terautentikasi
+- Token info (expiry, user, region, membership) ditampilkan setelah save
 
 ## Fitur Website (Swagger-like UI)
 
 1. **Base URL Display** - Ditampilkan di header halaman utama
-2. **Kimi Auth Management** - User paste cookie string, sistem extract kimi-auth JWT, simpan di localStorage
-3. **Interactive API Explorer** - Setiap endpoint bisa di-execute langsung dari browser:
+2. **Server-Side Token Management** - Save token ke server, auto-used untuk semua API calls
+3. **Chat Test UI** - Input text sederhana + model selector (tanpa perlu edit JSON)
+   - Model diberi tanda bintang untuk yang terbaik coding (K2.5 Thinking, K2.5 Agent, K2-0905, K2-Thinking)
+   - Typing indicator saat menunggu response
+4. **Interactive API Explorer** - Setiap endpoint bisa di-execute langsung dari browser:
    - Model selector dropdown (K2.5, K2, Moonshot, Vision, Latest)
    - Request body editor (JSON)
-   - Authorization auto-fill dari saved token
-   - Response viewer dengan JSON formatting
-   - Support streaming responses
-4. **Token Info** - Decode JWT dan tampilkan info (expiry, user, region, membership)
+   - Response viewer dengan JSON syntax highlighting
+5. **Token Info** - Decode JWT dan tampilkan info (expiry, user, region, membership)
 
 ## Dual API System
 - **Traditional API** (refresh_token): Fitur lengkap - multi-turn chat, file upload, image parsing, search
 - **Connect RPC API** (kimi-auth JWT): Basic chat, streaming, K2.5 support
 
 ## Recent Changes
+- 2026-02-16: Server-side token storage - save once, auto-used for all API calls
+- 2026-02-16: Simplified Chat Test UI - text input + model selector (no JSON editing)
+- 2026-02-16: Best coding models marked with star (K2.5 Thinking, K2.5 Agent, K2-0905, K2-Thinking)
+- 2026-02-16: All endpoints (chat, gemini, claude) use server token as fallback
 - 2026-02-16: Tambah model K2.5 (Instant, Thinking, Agent, Agent Swarm)
 - 2026-02-16: Buat Swagger-like Interactive API Explorer UI
 - 2026-02-16: Tambah endpoint /auth/extract untuk extract kimi-auth dari cookies
