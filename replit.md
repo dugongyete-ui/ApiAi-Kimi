@@ -9,6 +9,7 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 ### Status: Berjalan (Running)
 - Server aktif di port 5000
 - Semua endpoint sudah ditest dan berfungsi
+- Swagger-like Interactive UI tersedia di halaman utama
 
 ## Project Architecture
 
@@ -22,7 +23,7 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 ### Directory Structure
 ```
 ├── configs/dev/          # Konfigurasi service & system (YAML)
-├── public/               # Static files (welcome.html)
+├── public/               # Static files (welcome.html - Swagger UI)
 ├── src/
 │   ├── api/
 │   │   ├── controllers/  # Business logic
@@ -34,9 +35,10 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 │   │   │   ├── chat.ts   # POST /v1/chat/completions
 │   │   │   ├── ping.ts   # GET /ping
 │   │   │   ├── token.ts  # POST /token/check
-│   │   │   ├── models.ts # GET /v1/models
+│   │   │   ├── models.ts # GET /v1/models (16 models termasuk K2.5)
 │   │   │   ├── gemini.ts # Gemini endpoints (/v1beta/...)
-│   │   │   └── claude.ts # Claude endpoint (POST /v1/messages)
+│   │   │   ├── claude.ts # Claude endpoint (POST /v1/messages)
+│   │   │   └── auth.ts   # POST /auth/extract (Kimi Auth extraction)
 │   │   └── consts/       # Exception constants
 │   ├── lib/              # Core utilities
 │   │   ├── connect-rpc/  # Connect RPC protocol implementation
@@ -51,60 +53,88 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 └── vercel.json           # Vercel deployment config
 ```
 
+## Model AI yang Didukung (16 Model)
+
+### K2.5 Series (Terbaru)
+| Model ID | Nama | Deskripsi |
+|----------|------|-----------|
+| `kimi-k2.5-instant` | K2.5 Instant | Quick response, 256k context, fast 3-8s |
+| `kimi-k2.5-thinking` | K2.5 Thinking | Deep thinking, chain-of-thought reasoning |
+| `kimi-k2.5-agent` | K2.5 Agent | Research, slides, websites, docs, sheets |
+| `kimi-k2.5-agent-swarm` | K2.5 Agent Swarm | Multi-agent orchestration, 100 parallel sub-agents |
+
+### K2 Series
+| Model ID | Nama | Deskripsi |
+|----------|------|-----------|
+| `kimi-k2-0905-preview` | K2-0905 | 256k context, enhanced Agentic Coding |
+| `kimi-k2-0711-preview` | K2-0711 | 128k context, 1T params MoE |
+| `kimi-k2-turbo-preview` | K2-Turbo | High-speed, 60-100 tokens/s |
+| `kimi-k2-thinking` | K2-Thinking | Long-thinking model, deep reasoning |
+| `kimi-k2-thinking-turbo` | K2-Thinking-Turbo | Thinking high-speed |
+
+### Moonshot V1 Series
+| Model ID | Deskripsi |
+|----------|-----------|
+| `moonshot-v1-8k` | Short text, 8k context |
+| `moonshot-v1-32k` | Long text, 32k context |
+| `moonshot-v1-128k` | Ultra-long text, 128k context |
+
+### Vision & Latest
+| Model ID | Deskripsi |
+|----------|-----------|
+| `moonshot-v1-8k-vision-preview` | Vision 8k |
+| `moonshot-v1-32k-vision-preview` | Vision 32k |
+| `moonshot-v1-128k-vision-preview` | Vision 128k |
+| `kimi-latest` | Latest model, 128k context |
+
 ## API Endpoints
 
-### Endpoint Tanpa Autentikasi (Langsung Bisa Dipakai)
+### Endpoint Tanpa Autentikasi
 | Endpoint | Method | Deskripsi | Status |
 |----------|--------|-----------|--------|
-| `/` | GET | Halaman utama dengan panduan | OK |
+| `/` | GET | Swagger-like Interactive API Explorer | OK |
 | `/ping` | GET | Health check, return "pong" | OK |
-| `/v1/models` | GET | Daftar model OpenAI-compatible | OK |
+| `/v1/models` | GET | Daftar 16 model (termasuk K2.5) | OK |
 | `/v1beta/models` | GET | Daftar model Gemini-compatible | OK |
 
-### Endpoint Membutuhkan Token Kimi
-| Endpoint | Method | Deskripsi | Token Type |
-|----------|--------|-----------|------------|
-| `/v1/chat/completions` | POST | Chat completion (OpenAI format) | refresh_token atau JWT |
+### Endpoint Autentikasi
+| Endpoint | Method | Deskripsi | Token |
+|----------|--------|-----------|-------|
+| `/v1/chat/completions` | POST | Chat completion (OpenAI format) | refresh_token / JWT |
 | `/v1/messages` | POST | Chat completion (Claude format) | JWT (kimi-auth) |
-| `/v1beta/models/:model:generateContent` | POST | Content generation (Gemini format) | JWT (kimi-auth) |
-| `/v1beta/models/:model:streamGenerateContent` | POST | Streaming content (Gemini format) | JWT (kimi-auth) |
+| `/v1beta/models/:model:generateContent` | POST | Content generation (Gemini) | JWT |
+| `/v1beta/models/:model:streamGenerateContent` | POST | Streaming content (Gemini) | JWT |
 | `/token/check` | POST | Cek validitas token | refresh_token |
 
-### Dual API System
+### Endpoint Utility
+| Endpoint | Method | Deskripsi | Status |
+|----------|--------|-----------|--------|
+| `/auth/extract` | POST | Extract kimi-auth dari cookie string | OK |
+
+## Fitur Website (Swagger-like UI)
+
+1. **Base URL Display** - Ditampilkan di header halaman utama
+2. **Kimi Auth Management** - User paste cookie string, sistem extract kimi-auth JWT, simpan di localStorage
+3. **Interactive API Explorer** - Setiap endpoint bisa di-execute langsung dari browser:
+   - Model selector dropdown (K2.5, K2, Moonshot, Vision, Latest)
+   - Request body editor (JSON)
+   - Authorization auto-fill dari saved token
+   - Response viewer dengan JSON formatting
+   - Support streaming responses
+4. **Token Info** - Decode JWT dan tampilkan info (expiry, user, region, membership)
+
+## Dual API System
 - **Traditional API** (refresh_token): Fitur lengkap - multi-turn chat, file upload, image parsing, search
-- **Connect RPC API** (kimi-auth JWT): Hanya basic chat, streaming, tapi lebih baru
-
-## Requirements untuk Penggunaan Penuh
-
-**Yang Dibutuhkan:**
-1. **Kimi Token** - Diperlukan `refresh_token` atau `kimi-auth` JWT dari [kimi.moonshot.cn](https://kimi.moonshot.cn)
-   - `refresh_token`: Dari browser LocalStorage setelah login
-   - `kimi-auth`: Dari browser Cookies setelah login
+- **Connect RPC API** (kimi-auth JWT): Basic chat, streaming, K2.5 support
 
 ## Recent Changes
-- 2026-02-16: Konfigurasi awal untuk Replit - port diubah dari 8000 ke 5000
-- 2026-02-16: Install dependencies dan build berhasil
-- 2026-02-16: Semua API endpoint ditest dan berfungsi
+- 2026-02-16: Tambah model K2.5 (Instant, Thinking, Agent, Agent Swarm)
+- 2026-02-16: Buat Swagger-like Interactive API Explorer UI
+- 2026-02-16: Tambah endpoint /auth/extract untuk extract kimi-auth dari cookies
+- 2026-02-16: Base URL display di website
+- 2026-02-16: Update chat controller untuk handle K2.5 model scenarios
+- 2026-02-16: Cache-Control headers untuk prevent stale content
 
 ## User Preferences
 - Bahasa komunikasi: Bahasa Indonesia
 - Project di-clone dari GitHub, dikembangkan di Replit
-
-## Rekomendasi Pengembangan Kedepan
-
-### Priority Tinggi
-1. **Environment Variables**: Tambahkan dukungan token via environment variable agar tidak perlu kirim token di setiap request
-2. **Rate Limiting**: Tambahkan pembatasan request untuk mencegah penyalahgunaan
-3. **Error Handling Improvement**: Beberapa error message masih dalam bahasa China, perlu di-internasionalisasi
-
-### Priority Menengah
-4. **Dashboard/Admin Panel**: Buat halaman admin untuk monitor penggunaan, status token, dan log
-5. **Token Management**: Simpan dan kelola multiple token melalui UI
-6. **Caching Layer**: Tambahkan caching untuk response yang sama agar lebih cepat
-7. **Database Integration**: Gunakan PostgreSQL Replit untuk menyimpan log, token, dan usage statistics
-
-### Priority Rendah
-8. **Authentication Layer**: Tambahkan API key sendiri sebagai proteksi tambahan sebelum meneruskan ke Kimi
-9. **Deployment Config**: Setup production deployment di Replit
-10. **Monitoring & Alerts**: Tambahkan sistem notifikasi jika token expired atau server error
-11. **Multi-provider Support**: Tambahkan provider AI lain selain Kimi sebagai fallback
