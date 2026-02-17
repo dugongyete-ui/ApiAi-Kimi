@@ -112,6 +112,13 @@ export class ConnectRPCClient {
 
             logger.success(`Connect RPC response received: ${messages.length} messages`);
 
+            if (messages.length > 0 && messages[0].error) {
+                const errDetail = messages[0].error;
+                const reason = errDetail.details?.[0]?.debug?.reason || errDetail.code || 'unknown';
+                logger.error(`Kimi API error: ${reason}`);
+                throw new Error(`Kimi API error: ${reason}. Token mungkin sudah tidak valid. Silakan update token baru.`);
+            }
+
             return messages;
 
         } catch (error) {
@@ -199,6 +206,17 @@ export class ConnectRPCClient {
 
                             const message = decodeConnectMessage(messageData);
                             if (message) {
+                                if (message.error) {
+                                    const reason = message.error.details?.[0]?.debug?.reason || message.error.code || 'unknown';
+                                    logger.error(`Kimi API stream error: ${reason}`);
+                                    if (!chatIdResolved) {
+                                        resolveChatId(undefined);
+                                    }
+                                    outputStream.emit('connectError', new Error(`Kimi API error: ${reason}. Token mungkin sudah tidak valid.`));
+                                    outputStream.end();
+                                    return;
+                                }
+
                                 if (message.chat?.id && !chatIdResolved) {
                                     resolvedChatId = message.chat.id;
                                     chatIdResolved = true;

@@ -207,6 +207,28 @@ export async function createCompletionStreamV2(
         }
     });
 
+    connectStream.on('connectError', (err: Error) => {
+        logger.error(`V2 stream auth error: ${err.message}`);
+        const errorChunk = {
+            id: 'error',
+            object: 'chat.completion.chunk',
+            created: util.unixTimestamp(),
+            model: model,
+            choices: [
+                {
+                    index: 0,
+                    delta: {
+                        content: `[ERROR] ${err.message}`,
+                    },
+                    finish_reason: 'stop',
+                },
+            ],
+        };
+        sseStream.write(`data: ${JSON.stringify(errorChunk)}\n\n`);
+        sseStream.write('data: [DONE]\n\n');
+        sseStream.end();
+    });
+
     connectStream.on('end', () => {
         if (!sseStream.destroyed && sseStream.writable) {
             sseStream.end();

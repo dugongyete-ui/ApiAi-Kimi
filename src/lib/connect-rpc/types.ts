@@ -66,6 +66,16 @@ export interface ConnectMessage {
     };
     heartbeat?: {};
     done?: {};
+    error?: {
+        code: string;
+        details?: Array<{
+            type?: string;
+            value?: string;
+            debug?: {
+                reason?: string;
+            };
+        }>;
+    };
 }
 
 export interface TextResponse {
