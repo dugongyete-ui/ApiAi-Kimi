@@ -178,6 +178,18 @@ API "Claude" dan "Gemini" di sini BUKAN API asli. Ini adalah ADAPTER yang:
 | `/v1beta/models/:model:streamGenerateContent` | POST | Streaming content (Gemini) | Ya (otomatis) |
 | `/token/check` | POST | Cek validitas token | - |
 
+### Agent Endpoint - UNIFIED (1 endpoint semua mode)
+`POST /v1/agent/completions` menangani 3 mode sekaligus:
+
+| Mode | Body | Auth | Deskripsi |
+|------|------|------|-----------|
+| List tools | `{ "list_tools": true }` | Tidak perlu | Daftar 23 tools yang tersedia |
+| Task runner | `{ "task": "...", "context": "..." }` | JWT token | Jalankan task singkat (SSE stream) |
+| Chat agent | `{ "messages": [...], "conversation_id": "..." }` | JWT token | OpenAI-style chat dengan agent tools (SSE stream) |
+
+**Tools yang tersedia (23 tools):**
+`shell`, `browser`, `browser_navigate`, `browser_screenshot`, `browser_click`, `browser_type`, `browser_scroll`, `browser_get_text`, `browser_eval`, `web_search`, `http_request`, `code_execute` (python/js/ts/bash/ruby), `file_read/write/append/list/delete`, `archive_create_zip/extract_zip/create_tar/extract_tar/list`, `message`
+
 ### Endpoint Token Management (Server-Side)
 | Endpoint | Method | Deskripsi | Status |
 |----------|--------|-----------|--------|

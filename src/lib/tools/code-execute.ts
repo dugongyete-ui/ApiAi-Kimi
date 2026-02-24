@@ -25,16 +25,17 @@ function ensureWorkspace() {
     if (!fs.existsSync(WORKSPACE)) fs.mkdirSync(WORKSPACE, { recursive: true });
 }
 
-export async function executeCode(language: string, code: string, timeout = 30): Promise<CodeResult> {
+export async function executeCode(language: string, code: string, timeoutSec = 30): Promise<CodeResult> {
     ensureWorkspace();
     const lang = language.toLowerCase().trim();
     const ts = Date.now();
+    const timeoutMs = timeoutSec * 1000;
 
     if (lang === 'python' || lang === 'python3' || lang === 'py') {
         const fpath = path.join(WORKSPACE, `_code_${ts}.py`);
         fs.writeFileSync(fpath, code, 'utf8');
         try {
-            const r = await executeShell(`cd "${WORKSPACE}" && "${PYTHON3}" "${fpath}"`, timeout);
+            const r = await executeShell(`cd "${WORKSPACE}" && "${PYTHON3}" "${fpath}"`, timeoutMs);
             return {
                 success: r.exit_code === 0,
                 stdout: r.stdout || '',
@@ -51,7 +52,7 @@ export async function executeCode(language: string, code: string, timeout = 30):
         const fpath = path.join(WORKSPACE, `_code_${ts}.mjs`);
         fs.writeFileSync(fpath, code, 'utf8');
         try {
-            const r = await executeShell(`cd "${WORKSPACE}" && "${NODE_BIN}" "${fpath}"`, timeout);
+            const r = await executeShell(`cd "${WORKSPACE}" && "${NODE_BIN}" "${fpath}"`, timeoutMs);
             return {
                 success: r.exit_code === 0,
                 stdout: r.stdout || '',
@@ -68,7 +69,7 @@ export async function executeCode(language: string, code: string, timeout = 30):
         const fpath = path.join(WORKSPACE, `_code_${ts}.ts`);
         fs.writeFileSync(fpath, code, 'utf8');
         try {
-            const r = await executeShell(`cd "${WORKSPACE}" && npx tsx "${fpath}" 2>&1`, timeout);
+            const r = await executeShell(`cd "${WORKSPACE}" && npx tsx "${fpath}" 2>&1`, timeoutMs);
             return {
                 success: r.exit_code === 0,
                 stdout: r.stdout || '',
@@ -86,7 +87,7 @@ export async function executeCode(language: string, code: string, timeout = 30):
         fs.writeFileSync(fpath, code, 'utf8');
         fs.chmodSync(fpath, 0o755);
         try {
-            const r = await executeShell(`cd "${WORKSPACE}" && bash "${fpath}"`, timeout);
+            const r = await executeShell(`cd "${WORKSPACE}" && bash "${fpath}"`, timeoutMs);
             return {
                 success: r.exit_code === 0,
                 stdout: r.stdout || '',
@@ -103,7 +104,7 @@ export async function executeCode(language: string, code: string, timeout = 30):
         const fpath = path.join(WORKSPACE, `_code_${ts}.rb`);
         fs.writeFileSync(fpath, code, 'utf8');
         try {
-            const r = await executeShell(`cd "${WORKSPACE}" && ruby "${fpath}"`, timeout);
+            const r = await executeShell(`cd "${WORKSPACE}" && ruby "${fpath}"`, timeoutMs);
             return {
                 success: r.exit_code === 0,
                 stdout: r.stdout || '',

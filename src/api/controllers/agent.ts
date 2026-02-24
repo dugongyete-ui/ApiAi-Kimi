@@ -14,6 +14,9 @@ import {
     browserNavigate, browserScreenshot, browserClick, browserType,
     browserScroll, browserGetText, browserGetHTML, browserEval,
 } from '@/lib/tools/playwright-browser.ts';
+import { searchImageByText, searchImageByImage } from '@/lib/tools/image-search.ts';
+import { getDataSourceDesc, getDataSource } from '@/lib/tools/datasource.ts';
+import { memorySpaceEdits } from '@/lib/tools/memory.ts';
 
 const MAX_ITERATIONS = 30;
 const MAX_TOOL_RESULT_LEN = 8000;
@@ -57,9 +60,40 @@ AVAILABLE TOOLS:
 - web_search         : Search the web and return results
   args: {"query":"search terms"}
 
+── WEB / URL ACCESS ──────────────────────────────────
+- web_open_url       : Open a specific URL and extract readable content
+  args: {"url":"https://example.com"}
+
+── IMAGE SEARCH ──────────────────────────────────────
+- search_image_by_text  : Search for images by text description (returns up to 10 image URLs)
+  args: {"query":"golden gate bridge sunset","limit":8}
+- search_image_by_image : Reverse image search — find similar images by URL
+  args: {"image_url":"https://example.com/image.jpg","limit":6}
+
 ── HTTP API ──────────────────────────────────────────
 - http_request       : Make HTTP requests (REST API calls)
   args: {"method":"POST","url":"https://api.example.com/data","headers":{"Content-Type":"application/json"},"body":{"key":"value"}}
+
+── DATA SOURCES (Structured Data) ────────────────────
+- get_datasource_desc : Get description and params of a data source (or list all)
+  args: {"source":"yahoo_finance"} or {} for all sources
+
+- get_data_source    : Fetch structured data from a named source
+  Supported sources and their args:
+  • yahoo_finance   : {"source":"yahoo_finance","query":"TSLA","type":"quote"}
+                      types: quote | history | search | news | financials
+                      For history add: {"period":"1mo","interval":"1d"}
+  • binance_crypto  : {"source":"binance_crypto","query":"BTCUSDT","type":"ticker24h"}
+                      types: price | ticker24h | klines | exchange_info
+                      For klines add: {"interval":"1h","limit":24}
+  • world_bank_open_data : {"source":"world_bank_open_data","query":"ID","indicator":"NY.GDP.MKTP.CD","type":"indicator"}
+                           types: indicator | country | search_indicators
+                           Common indicators: NY.GDP.MKTP.CD (GDP), SP.POP.TOTL (Population),
+                           FP.CPI.TOTL.ZG (Inflation), SL.UEM.TOTL.ZS (Unemployment)
+  • arxiv           : {"source":"arxiv","query":"large language models 2024","type":"search","max_results":5}
+                      types: search | paper (add paper_id for type:paper)
+  • google_scholar  : {"source":"google_scholar","query":"transformer attention","type":"search","limit":5}
+                      types: search | paper | author
 
 ── CODE EXECUTION ────────────────────────────────────
 - code_execute       : Run code in Python, JavaScript, TypeScript, Bash, Ruby
@@ -89,6 +123,14 @@ AVAILABLE TOOLS:
   args: {"path":"archive.tar.gz","dest":"output_dir/"}
 - archive_list        : List contents of an archive
   args: {"path":"archive.zip"}
+
+── MEMORY ────────────────────────────────────────────
+- memory_space_edits : Manage persistent memory across sessions
+  args: {"action":"add","content":"User is vegetarian"}
+  args: {"action":"replace","id":"mem_123","content":"Updated info"}
+  args: {"action":"remove","id":"mem_123"}
+  args: {"action":"list"}
+  actions: add | replace | remove | list | clear
 
 ── COMMUNICATION ─────────────────────────────────────
 - message            : Send a status message to the user
@@ -301,6 +343,57 @@ async function runTool(name: string, args: Record<string, any>): Promise<string>
         case 'archive_list': {
             const r = await listArchive(String(args.path || ''));
             return r.success ? (r.files?.join('\n') || r.output || '(empty)') : `Error: ${r.error}`;
+        }
+
+        // ── Web / URL access ──
+        case 'web_open_url': {
+            const r = await fetchUrl(String(args.url || ''));
+            if (r.error) return `Error: ${r.error}`;
+            return `URL: ${r.url}\nTitle: ${r.title}\n\n${r.content}`;
+        }
+
+        // ── Image search ──
+        case 'search_image_by_text': {
+            const r = await searchImageByText(String(args.query || ''), Number(args.limit) || 8);
+            if (r.error && r.results.length === 0) return `Error: ${r.error}`;
+            return r.results.map((img, i) =>
+                `[${i + 1}] ${img.title}\n    Image: ${img.image_url}\n    Thumbnail: ${img.thumbnail_url}\n    Source: ${img.source_url}${img.width ? `\n    Size: ${img.width}x${img.height}` : ''}`
+            ).join('\n\n') || 'No image results found.';
+        }
+
+        case 'search_image_by_image': {
+            const url = String(args.image_url || args.url || '');
+            const r = await searchImageByImage(url, Number(args.limit) || 6);
+            if (r.error && r.results.length === 0) return `Error: ${r.error}`;
+            return r.results.map((img, i) =>
+                `[${i + 1}] ${img.title}\n    Image: ${img.image_url}\n    Thumbnail: ${img.thumbnail_url}`
+            ).join('\n\n') || 'No similar images found.';
+        }
+
+        // ── Data sources ──
+        case 'get_datasource_desc': {
+            const desc = getDataSourceDesc(args.source);
+            return JSON.stringify(desc, null, 2);
+        }
+
+        case 'get_data_source': {
+            const source = String(args.source || '');
+            const { source: _, ...params } = args;
+            const r = await getDataSource(source, params);
+            if (r.error) return `Error from ${source}: ${r.error}`;
+            return `[${source}]\n${JSON.stringify(r.data, null, 2).slice(0, MAX_TOOL_RESULT_LEN)}`;
+        }
+
+        // ── Memory ──
+        case 'memory_space_edits': {
+            const action = args.action as any;
+            const r = memorySpaceEdits(action, { id: args.id, content: args.content, old_content: args.old_content });
+            if (!r.success) return `Error: ${r.error}`;
+            if (action === 'list') {
+                if (!r.entries || r.entries.length === 0) return 'Memory is empty.';
+                return r.entries.map((e, i) => `[${i + 1}] id=${e.id}\n    ${e.content}\n    (created: ${e.created_at.split('T')[0]})`).join('\n\n');
+            }
+            return r.message || 'OK';
         }
 
         // ── Message ──
