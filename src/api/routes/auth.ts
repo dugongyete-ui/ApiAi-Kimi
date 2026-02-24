@@ -7,6 +7,18 @@ export function getServerToken(): string {
     return tokenStore.getToken();
 }
 
+export function resolveToken(bearerValue: string): string {
+    if (tokenStore.isApiKey(bearerValue)) {
+        const resolved = tokenStore.resolveApiKey(bearerValue);
+        if (resolved) {
+            logger.info(`API key resolved to kimi-auth token`);
+            return resolved;
+        }
+        return '';
+    }
+    return bearerValue;
+}
+
 function decodeToken(token: string): any {
     try {
         const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
@@ -88,14 +100,33 @@ export default {
                 };
             }
 
-            tokenStore.save(kimiAuth, tokenInfo.expires_at, tokenInfo.expires_at ? Math.floor(new Date(tokenInfo.expires_at).getTime() / 1000) : null);
+            const apiKey = tokenStore.save(kimiAuth, tokenInfo.expires_at, tokenInfo.expires_at ? Math.floor(new Date(tokenInfo.expires_at).getTime() / 1000) : null);
             logger.success('Server token saved successfully (persistent)');
 
             return {
                 success: true,
-                message: 'Token saved to server (persistent). Akan tetap tersimpan walau server restart.',
+                message: 'Token saved. Gunakan api_key di bawah sebagai Authorization: Bearer <api_key>',
+                api_key: apiKey,
                 token_info: tokenInfo,
-                storage: 'persistent_file'
+                storage: 'persistent_file',
+                usage_example: `Authorization: Bearer ${apiKey}`
+            };
+        },
+
+        '/apikey/rotate': async () => {
+            if (!tokenStore.hasToken()) {
+                return {
+                    success: false,
+                    error: 'No token saved on server. Save a token first via /auth/save'
+                };
+            }
+
+            const newApiKey = tokenStore.rotateApiKey();
+            return {
+                success: true,
+                message: 'API key rotated. Update semua client Anda dengan key baru ini.',
+                api_key: newApiKey,
+                usage_example: `Authorization: Bearer ${newApiKey}`
             };
         }
     },
@@ -112,12 +143,32 @@ export default {
             const token = tokenStore.getToken();
             const tokenInfo = decodeToken(token);
             const storeInfo = tokenStore.getInfo();
+            const apiKey = tokenStore.getApiKey();
             return {
                 has_token: true,
                 token_info: tokenInfo,
                 token_preview: token.substring(0, 30) + '...',
+                api_key: apiKey,
                 saved_at: storeInfo?.saved_at || null,
-                storage: 'persistent_file'
+                storage: 'persistent_file',
+                usage_example: apiKey ? `Authorization: Bearer ${apiKey}` : null
+            };
+        },
+
+        '/apikey': async () => {
+            if (!tokenStore.hasToken()) {
+                return {
+                    success: false,
+                    error: 'No token saved on server. Save a token first via POST /auth/save'
+                };
+            }
+
+            const apiKey = tokenStore.getApiKey();
+            return {
+                success: true,
+                api_key: apiKey,
+                usage_example: `Authorization: Bearer ${apiKey}`,
+                hint: 'Gunakan api_key ini di semua request sebagai Bearer token. Untuk generate key baru, POST ke /auth/apikey/rotate'
             };
         },
 
@@ -126,7 +177,7 @@ export default {
             logger.info('Server token cleared (persistent)');
             return {
                 success: true,
-                message: 'Server token cleared from persistent storage'
+                message: 'Server token and API key cleared from persistent storage'
             };
         }
     }

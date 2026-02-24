@@ -4,7 +4,7 @@ import Request from '@/lib/request/Request.ts';
 import Response from '@/lib/response/Response.ts';
 import chat from '@/api/controllers/chat.ts';
 import { createCompletionV2, createCompletionStreamV2, detectTokenType } from '@/api/controllers/chat-v2.ts';
-import { getServerToken } from '@/api/routes/auth.ts';
+import { getServerToken, resolveToken } from '@/api/routes/auth.ts';
 import logger from '@/lib/logger.ts';
 
 export default {
@@ -26,11 +26,16 @@ export default {
                     authHeader = `Bearer ${serverToken}`;
                     logger.info('Using server-saved token for request');
                 } else {
-                    throw new Error('No token provided. Please save a Kimi Auth token first via the website or provide Authorization header.');
+                    throw new Error('No token provided. Please save a Kimi Auth token first via POST /auth/save or provide Authorization header.');
                 }
             }
 
-            const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+            const rawToken = authHeader.replace(/^Bearer\s+/i, '').trim();
+            const token = resolveToken(rawToken);
+
+            if (!token) {
+                throw new Error('Invalid API key or token. Check your API key via GET /auth/apikey');
+            }
 
             const tokenType = detectTokenType(token);
 

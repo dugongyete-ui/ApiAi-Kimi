@@ -8,6 +8,7 @@ import models from './models.ts';
 import gemini from './gemini.ts';
 import claude from './claude.ts';
 import auth from './auth.ts';
+import agent from './agent.ts';
 
 export default [
     {
@@ -31,5 +32,6 @@ export default [
     models,
     gemini,
     claude,
-    auth
+    auth,
+    agent
 ];

@@ -469,6 +469,77 @@
     .auth-status.error { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning); }
     .auth-status.info { background: var(--info-bg); color: var(--primary); border: 1px solid var(--primary); }
 
+    .apikey-box {
+      display: none;
+      margin-top: 12px;
+      border: 2px solid var(--success);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .apikey-box.visible { display: block; }
+    .apikey-box-header {
+      background: var(--success);
+      color: #fff;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .apikey-box-body { background: #fff; padding: 12px 14px; }
+    .apikey-label { font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .apikey-value-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .apikey-value {
+      flex: 1;
+      padding: 8px 12px;
+      background: #1e1e2e;
+      color: #a6e3a1;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      word-break: break-all;
+      letter-spacing: 0.5px;
+    }
+    .apikey-copy-btn {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 4px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .apikey-copy-btn:hover { background: var(--primary-dark); }
+    .apikey-copy-btn.copied { background: var(--success-dark); }
+    .apikey-usage {
+      padding: 8px 12px;
+      background: #f8f9fa;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .apikey-usage-label { font-size: 11px; color: var(--muted); margin-bottom: 3px; font-weight: 600; }
+    .apikey-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .apikey-rotate-btn {
+      padding: 6px 14px;
+      border: 1px solid var(--warning);
+      border-radius: 4px;
+      background: #fff;
+      color: var(--warning);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .apikey-rotate-btn:hover { background: var(--warning); color: #fff; }
+
     /* Chat Tab Styles */
     .chat-container {
       display: flex;
@@ -711,15 +782,31 @@
   <main class="container" style="padding-top: 20px;">
 
     <div class="auth-section">
-      <div class="auth-title">&#128274; Authorize (Kimi Auth Token)</div>
-      <p style="font-size:12px;color:var(--muted);margin:0 0 8px;">Paste cookie string atau kimi-auth JWT token. Token akan disimpan di server dan digunakan otomatis untuk semua API calls.</p>
+      <div class="auth-title">&#128274; Authorize &amp; Generate API Key</div>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 8px;">Paste cookie string atau kimi-auth JWT token. Setelah disimpan, API Key otomatis digenerate — gunakan sebagai <code style="background:#f1f5f9;padding:1px 5px;border-radius:3px;">Authorization: Bearer sk-kimi-xxxx</code> di semua request.</p>
       <input type="text" class="auth-input" id="authInput" placeholder="eyJhbGciOiJIUzI1... atau _ga=...; kimi-auth=eyJ..."/>
       <div class="auth-btns">
-        <button class="auth-btn auth-btn-primary" onclick="saveToken()">Save ke Server</button>
-        <button class="auth-btn auth-btn-default" onclick="checkStatus()">Cek Status</button>
-        <button class="auth-btn auth-btn-danger" onclick="clearToken()">Hapus Token</button>
+        <button class="auth-btn auth-btn-primary" onclick="saveToken()">&#128190; Save &amp; Generate API Key</button>
+        <button class="auth-btn auth-btn-default" onclick="checkStatus()">&#128269; Cek Status &amp; Tampilkan Key</button>
+        <button class="auth-btn auth-btn-danger" onclick="clearToken()">&#128465; Hapus Token</button>
       </div>
       <div class="auth-status" id="authStatus"></div>
+
+      <div class="apikey-box" id="apikeyBox">
+        <div class="apikey-box-header">&#128273; API Key Anda</div>
+        <div class="apikey-box-body">
+          <div class="apikey-label">API Key (gunakan sebagai Bearer Token)</div>
+          <div class="apikey-value-row">
+            <div class="apikey-value" id="apikeyValue">-</div>
+            <button class="apikey-copy-btn" id="apikeyCopyBtn" onclick="copyApiKey()">&#128203; Copy</button>
+          </div>
+          <div class="apikey-usage-label">Contoh penggunaan:</div>
+          <div class="apikey-usage" id="apikeyUsage">Authorization: Bearer sk-kimi-...</div>
+          <div class="apikey-actions">
+            <button class="apikey-rotate-btn" onclick="rotateApiKey()">&#128260; Generate Key Baru</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="tab-bar">
@@ -914,19 +1001,60 @@
         ]
       },
       {
-        name: 'Token Management',
+        name: 'Agent Tools (AI + Real Execution)',
         endpoints: [
           {
-            method: 'GET', path: '/auth/status', desc: 'Status Token Server',
-            description: 'Mengecek status token yang tersimpan di server (expiry, user info).',
+            method: 'GET', path: '/v1/agent/tools', desc: 'Daftar Tools Agent',
+            description: 'Melihat semua tools yang tersedia untuk agent: shell, browser, web_search, file_read, file_write, file_append, file_list, file_delete, message.',
             params: [], hasBody: false, hasModel: false
           },
           {
-            method: 'POST', path: '/auth/save', desc: 'Simpan Token ke Server',
-            description: 'Menyimpan token ke server. Token akan digunakan otomatis untuk semua API calls.',
+            method: 'POST', path: '/v1/agent/completions', desc: 'Agent Chat (Tools Nyata)',
+            description: 'Chat dengan AI agent yang bisa mengeksekusi tools nyata di server: terminal, browser, file, web search. Response di-stream sebagai SSE events (agent_start, tool_call, tool_result, agent_done).',
+            params: [],
+            hasBody: true, hasModel: true,
+            defaultBody: {
+              model: 'kimi',
+              messages: [{ role: 'user', content: 'Cek versi node.js dan npm yang terinstall, lalu list file di direktori root' }],
+              stream: true
+            }
+          },
+          {
+            method: 'POST', path: '/v1/agent/run', desc: 'Jalankan Task Agent',
+            description: 'Cara mudah menjalankan task agent. Cukup kirim { task: "..." } dan agent akan mengerjakan dengan tools yang tersedia.',
+            params: [],
+            hasBody: true, hasModel: false,
+            defaultBody: {
+              task: 'Cari informasi terbaru tentang model AI Kimi K2, lalu tulis rangkumannya ke file summary.txt',
+              context: 'Kamu adalah research assistant yang membantu mencari dan merangkum informasi.'
+            }
+          }
+        ]
+      },
+      {
+        name: 'Token & API Key Management',
+        endpoints: [
+          {
+            method: 'GET', path: '/auth/status', desc: 'Status Token & API Key',
+            description: 'Mengecek status token yang tersimpan di server beserta API key yang aktif.',
+            params: [], hasBody: false, hasModel: false
+          },
+          {
+            method: 'GET', path: '/auth/apikey', desc: 'Tampilkan API Key',
+            description: 'Melihat API key yang aktif.',
+            params: [], hasBody: false, hasModel: false
+          },
+          {
+            method: 'POST', path: '/auth/save', desc: 'Simpan Token & Generate API Key',
+            description: 'Menyimpan token ke server dan generate API key otomatis. Response berisi api_key yang bisa dipakai langsung.',
             params: [],
             hasBody: true, hasModel: false,
             defaultBody: { cookies: 'paste_cookie_or_jwt_here' }
+          },
+          {
+            method: 'POST', path: '/auth/apikey/rotate', desc: 'Rotate API Key (Generate Baru)',
+            description: 'Generate API key baru. Key lama tidak akan berfungsi lagi.',
+            params: [], hasBody: false, hasModel: false
           },
           {
             method: 'POST', path: '/auth/extract', desc: 'Extract kimi-auth dari Cookies',
@@ -936,16 +1064,9 @@
             defaultBody: { cookies: '_ga=...; kimi-auth=eyJ...' }
           },
           {
-            method: 'GET', path: '/auth/clear', desc: 'Hapus Token Server',
-            description: 'Menghapus token yang tersimpan di server.',
+            method: 'GET', path: '/auth/clear', desc: 'Hapus Token & API Key',
+            description: 'Menghapus token dan API key dari server.',
             params: [], hasBody: false, hasModel: false
-          },
-          {
-            method: 'POST', path: '/token/check', desc: 'Cek Validitas Token',
-            description: 'Mengecek apakah refresh_token masih valid.',
-            params: [],
-            hasBody: true, hasModel: false,
-            defaultBody: { token: '' }
           }
         ]
       }
@@ -1236,6 +1357,52 @@
       document.getElementById('respHeaders-'+i).classList.toggle('visible');
     }
 
+    function showApiKey(apiKey) {
+      if (!apiKey) return;
+      const box = document.getElementById('apikeyBox');
+      const valEl = document.getElementById('apikeyValue');
+      const usageEl = document.getElementById('apikeyUsage');
+      valEl.textContent = apiKey;
+      usageEl.textContent = 'Authorization: Bearer ' + apiKey;
+      box.classList.add('visible');
+    }
+
+    function hideApiKey() {
+      document.getElementById('apikeyBox').classList.remove('visible');
+    }
+
+    function copyApiKey() {
+      const val = document.getElementById('apikeyValue').textContent;
+      const btn = document.getElementById('apikeyCopyBtn');
+      navigator.clipboard.writeText(val).then(() => {
+        btn.textContent = '✓ Tersalin!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.innerHTML = '&#128203; Copy'; btn.classList.remove('copied'); }, 2000);
+      });
+    }
+
+    async function rotateApiKey() {
+      const status = document.getElementById('authStatus');
+      try {
+        const res = await fetch(BASE_URL + '/auth/apikey/rotate', { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          showApiKey(data.api_key);
+          status.className = 'auth-status visible success';
+          status.innerHTML = '<strong>API Key baru berhasil digenerate!</strong> Update semua client Anda dengan key di bawah.';
+          status.classList.add('visible');
+        } else {
+          status.className = 'auth-status visible error';
+          status.textContent = 'Gagal: ' + (data.error || 'Unknown error');
+          status.classList.add('visible');
+        }
+      } catch (e) {
+        status.className = 'auth-status visible error';
+        status.textContent = 'Error: ' + e.message;
+        status.classList.add('visible');
+      }
+    }
+
     async function saveToken() {
       const input = document.getElementById('authInput').value.trim();
       const status = document.getElementById('authStatus');
@@ -1251,14 +1418,16 @@
         if (data.success) {
           status.className = 'auth-status visible success';
           const ti = data.token_info || {};
-          status.innerHTML = '<strong>Token berhasil disimpan (Persistent)!</strong> Token akan tetap tersimpan walau server restart.'
+          status.innerHTML = '<strong>Token berhasil disimpan! API Key siap digunakan.</strong>'
             + (ti.expires_at ? '<br>Expires: '+new Date(ti.expires_at).toLocaleString() : '')
             + (ti.remaining_hours != null ? ' ('+ti.remaining_hours+' jam lagi)' : '')
             + (ti.user_id ? ' | User: '+ti.user_id : '')
             + (ti.region ? ' | Region: '+ti.region : '');
+          if (data.api_key) showApiKey(data.api_key);
         } else {
           status.className = 'auth-status visible error';
           status.textContent = 'Gagal: '+(data.error||'Unknown error');
+          hideApiKey();
         }
       } catch (e) {
         status.className = 'auth-status visible error';
@@ -1274,22 +1443,23 @@
         status.classList.add('visible');
         if (data.has_token === false) {
           status.className = 'auth-status visible info';
-          status.textContent = 'Belum ada token di server.';
+          status.textContent = 'Belum ada token di server. Paste cookie Anda lalu klik "Save & Generate API Key".';
+          hideApiKey();
         } else {
           const ti = data.token_info || {};
           if (ti.is_expired === false) {
             status.className = 'auth-status visible success';
-            status.innerHTML = '<strong>Token Valid (Persistent)</strong>'
+            status.innerHTML = '<strong>Token Valid</strong>'
               + (ti.expires_at ? ' | Expires: '+new Date(ti.expires_at).toLocaleString() : '')
               + (ti.remaining_hours != null ? ' ('+ti.remaining_hours+' jam lagi)' : '')
               + (ti.user_id ? ' | User: '+ti.user_id : '')
               + (ti.region ? ' | Region: '+ti.region : '')
-              + (data.saved_at ? '<br>Disimpan: '+new Date(data.saved_at).toLocaleString() : '')
-              + ' | Storage: persistent file'
-              + '<br>Preview: '+(data.token_preview||'');
+              + (data.saved_at ? '<br>Disimpan: '+new Date(data.saved_at).toLocaleString() : '');
+            if (data.api_key) showApiKey(data.api_key);
           } else {
             status.className = 'auth-status visible error';
             status.textContent = 'Token Expired: '+new Date(ti.expires_at).toLocaleString();
+            hideApiKey();
           }
         }
       } catch (e) {
@@ -1304,7 +1474,9 @@
         await fetch(BASE_URL + '/auth/clear');
         document.getElementById('authInput').value = '';
         status.className = 'auth-status visible info';
-        status.textContent = 'Token di server berhasil dihapus dari persistent storage.';
+        status.textContent = 'Token dan API Key di server berhasil dihapus.';
+        status.classList.add('visible');
+        hideApiKey();
       } catch (e) {
         status.className = 'auth-status visible error';
         status.textContent = 'Error: '+e.message;
