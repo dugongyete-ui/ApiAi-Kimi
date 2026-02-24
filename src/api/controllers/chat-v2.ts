@@ -9,6 +9,7 @@ import APIException from "@/lib/exceptions/APIException.ts";
 import EX from "@/api/consts/exceptions.ts";
 import logger from '@/lib/logger.ts';
 import util from '@/lib/util.ts';
+import sessionStore from '@/lib/session-store.ts';
 
 const MODEL_NAME = 'kimi';
 
@@ -95,12 +96,20 @@ export async function createCompletionV2(
     authToken: string,
     convId?: string
 ): Promise<any> {
-    logger.info(`V2 completion (non-stream), model: ${model}, chatId: ${convId || 'new'}`);
-
     const tokenType = detectTokenType(authToken);
     if (tokenType !== 'jwt') {
         throw new APIException(EX.API_REQUEST_FAILED, 'Connect RPC requires JWT token (kimi-auth).');
     }
+
+    let resolvedConvId = convId;
+    if (!resolvedConvId) {
+        const found = sessionStore.findSession(authToken, messages);
+        if (found) {
+            resolvedConvId = found;
+        }
+    }
+
+    logger.info(`V2 completion (non-stream), model: ${model}, chatId: ${resolvedConvId || 'new'}`);
 
     const messageContent = extractMessageContent(messages);
     const client = createClient(authToken);
@@ -110,11 +119,16 @@ export async function createCompletionV2(
     const response = await client.chatText(messageContent, {
         scenario: scenario as any,
         thinking: isThinking,
-        chatId: convId,
+        chatId: resolvedConvId,
     });
 
+    const finalChatId = response.chatId || util.uuid();
+    const assistantText = response.text || '';
+
+    sessionStore.saveSession(authToken, messages, finalChatId, assistantText);
+
     return {
-        id: response.chatId || util.uuid(),
+        id: finalChatId,
         model: model,
         object: 'chat.completion',
         choices: [
@@ -122,15 +136,15 @@ export async function createCompletionV2(
                 index: 0,
                 message: {
                     role: 'assistant',
-                    content: response.text,
+                    content: assistantText,
                 },
                 finish_reason: 'stop',
             },
         ],
         usage: {
             prompt_tokens: messageContent.length,
-            completion_tokens: response.text.length,
-            total_tokens: messageContent.length + response.text.length,
+            completion_tokens: assistantText.length,
+            total_tokens: messageContent.length + assistantText.length,
         },
         created: util.unixTimestamp(),
     };
@@ -142,12 +156,20 @@ export async function createCompletionStreamV2(
     authToken: string,
     convId?: string
 ): Promise<PassThrough> {
-    logger.info(`V2 completion (stream), model: ${model}, chatId: ${convId || 'new'}`);
-
     const tokenType = detectTokenType(authToken);
     if (tokenType !== 'jwt') {
         throw new APIException(EX.API_REQUEST_FAILED, 'Connect RPC requires JWT token (kimi-auth).');
     }
+
+    let resolvedConvId = convId;
+    if (!resolvedConvId) {
+        const found = sessionStore.findSession(authToken, messages);
+        if (found) {
+            resolvedConvId = found;
+        }
+    }
+
+    logger.info(`V2 completion (stream), model: ${model}, chatId: ${resolvedConvId || 'new'}`);
 
     const messageContent = extractMessageContent(messages);
     const client = createClient(authToken);
@@ -157,11 +179,12 @@ export async function createCompletionStreamV2(
     const { stream: connectStream, chatIdPromise } = await client.chatStream(messageContent, {
         scenario: scenario as any,
         thinking: isThinking,
-        chatId: convId,
+        chatId: resolvedConvId,
     });
 
     const sseStream = new PassThrough();
-    let responseChatId = convId || '';
+    let responseChatId = resolvedConvId || '';
+    let collectedText = '';
 
     connectStream.on('connectMessage', (msg: any) => {
         if (msg.chat?.id && !responseChatId) {
@@ -169,6 +192,8 @@ export async function createCompletionStreamV2(
         }
 
         if (msg.block?.text?.content) {
+            collectedText += msg.block.text.content;
+
             const chunk = {
                 id: responseChatId || util.uuid(),
                 object: 'chat.completion.chunk',
@@ -188,6 +213,10 @@ export async function createCompletionStreamV2(
         }
 
         if (msg.done) {
+            if (responseChatId && collectedText) {
+                sessionStore.saveSession(authToken, messages, responseChatId, collectedText);
+            }
+
             const endChunk = {
                 id: responseChatId || util.uuid(),
                 object: 'chat.completion.chunk',
