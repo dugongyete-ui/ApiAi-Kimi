@@ -1,7 +1,15 @@
 import { executeShell } from './shell.ts';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as os from 'os';
+import { execSync } from 'child_process';
+
+// Resolve Python/Node paths from environment
+function resolveBin(name: string): string {
+    try { return execSync(`which ${name}`, { encoding: 'utf8' }).trim(); } catch { return name; }
+}
+
+const PYTHON3 = resolveBin('python3');
+const NODE_BIN = resolveBin('node');
 
 export interface CodeResult {
     success: boolean;
@@ -26,7 +34,7 @@ export async function executeCode(language: string, code: string, timeout = 30):
         const fpath = path.join(WORKSPACE, `_code_${ts}.py`);
         fs.writeFileSync(fpath, code, 'utf8');
         try {
-            const r = await executeShell(`cd "${WORKSPACE}" && python3 "${fpath}"`, timeout);
+            const r = await executeShell(`cd "${WORKSPACE}" && "${PYTHON3}" "${fpath}"`, timeout);
             return {
                 success: r.exit_code === 0,
                 stdout: r.stdout || '',
@@ -43,7 +51,7 @@ export async function executeCode(language: string, code: string, timeout = 30):
         const fpath = path.join(WORKSPACE, `_code_${ts}.mjs`);
         fs.writeFileSync(fpath, code, 'utf8');
         try {
-            const r = await executeShell(`cd "${WORKSPACE}" && node "${fpath}"`, timeout);
+            const r = await executeShell(`cd "${WORKSPACE}" && "${NODE_BIN}" "${fpath}"`, timeout);
             return {
                 success: r.exit_code === 0,
                 stdout: r.stdout || '',

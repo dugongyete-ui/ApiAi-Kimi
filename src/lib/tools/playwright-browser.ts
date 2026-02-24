@@ -4,7 +4,8 @@ import * as path from 'path';
 import logger from '@/lib/logger.ts';
 
 const SCREENSHOT_DIR = path.join(process.cwd(), 'agent-workspace', 'screenshots');
-const CHROMIUM_PATH = '/home/runner/.playwright/chromium_headless_shell-1208/chrome-headless-shell-linux64/chrome-headless-shell';
+// Use the nix-provided Chromium which has all required libraries bundled
+const CHROMIUM_PATH = '/nix/store/0n9rl5l9syy808xi9bk4f6dhnfrvhkww-playwright-browsers-chromium/chromium-1080/chrome-linux/chrome';
 
 let browser: Browser | null = null;
 let context: BrowserContext | null = null;
