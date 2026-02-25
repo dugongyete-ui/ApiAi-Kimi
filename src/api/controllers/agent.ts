@@ -17,6 +17,20 @@ import {
 import { searchImageByText, searchImageByImage } from '@/lib/tools/image-search.ts';
 import { getDataSourceDesc, getDataSource } from '@/lib/tools/datasource.ts';
 import { memorySpaceEdits } from '@/lib/tools/memory.ts';
+import {
+    createDirectory, moveFile, copyFile, createProject, deleteProject,
+    switchWorkspace, getProjectStructure, searchInFiles,
+} from '@/lib/tools/workspace.ts';
+import { installPackage, debugCode, applyPatch } from '@/lib/tools/code-tools.ts';
+import { generateMarkdown, generateJson, generateCsv, generateHtml, generatePdf } from '@/lib/tools/file-generator.ts';
+import {
+    plannerPhase, stepTracker, loopSupervisor, toolValidator, reflectionPass,
+    memoryStore, memoryRetrieve,
+} from '@/lib/tools/agent-intelligence.ts';
+import {
+    getEnvironmentVariables, setEnvironmentVariable, getSystemInfo,
+    checkDiskUsage, checkWebsiteStatus,
+} from '@/lib/tools/system-utils.ts';
 
 const MAX_ITERATIONS = 30;
 const MAX_TOOL_RESULT_LEN = 8000;
@@ -136,6 +150,80 @@ AVAILABLE TOOLS:
 - message            : Send a status message to the user
   args: {"content":"Task 1/3 complete..."}
 
+── FILE SYSTEM (short aliases) ──────────────────────
+- read_file / write_file / list_directory / delete_file : aliases for file_* tools
+- create_directory   : Create directory (with parents)
+  args: {"path":"my-project/src/utils"}
+- move_file          : Move or rename a file
+  args: {"src":"draft.txt","dest":"final/report.txt"}
+- copy_file          : Copy a file to new location
+  args: {"src":"template.html","dest":"pages/about.html"}
+- get_project_structure : Tree view of a directory
+  args: {"path":".","max_depth":3}
+- search_in_files    : Grep text across all files in a directory
+  args: {"query":"def main","path":".","glob":"*.py"}
+
+── CODE TOOLS ────────────────────────────────────────
+- run_code / run_shell : aliases for code_execute / shell
+- install_package    : Install npm/pip/yarn package
+  args: {"package_name":"requests","manager":"pip"}
+- debug_code         : Run code and analyze errors with suggestions
+  args: {"language":"python","code":"import pandas"}
+- apply_patch        : Apply a unified diff patch to a file
+  args: {"patch":"--- a/f.py\n+++ b/f.py\n@@...","file":"f.py"}
+
+── PROJECT MANAGEMENT ────────────────────────────────
+- create_project     : Scaffold a new project directory
+  args: {"name":"my-api","template":"node"} (templates: node|python|web|blank)
+- delete_project     : Delete project directory (requires confirm:true)
+  args: {"name":"old-project","confirm":true}
+- switch_workspace   : Set working context to a subdirectory
+  args: {"path":"my-project"}
+
+── WEB & NETWORK ─────────────────────────────────────
+- fetch_url_content  : alias for web_open_url
+- check_website_status : Check if a site is up + response time
+  args: {"url":"https://google.com","timeout":10}
+
+── FILE GENERATION ───────────────────────────────────
+- generate_pdf       : Generate PDF from text or HTML (uses browser rendering)
+  args: {"content":"Hello World","file":"report.pdf","title":"My Report"}
+- generate_markdown  : Write a .md file
+  args: {"content":"# Title\nContent","file":"notes.md"}
+- generate_json      : Save data as formatted JSON file
+  args: {"data":{"key":"value"},"file":"result.json"}
+- generate_csv       : Generate CSV from array of objects or 2D array
+  args: {"data":[{"name":"Alice","score":95}],"file":"scores.csv"}
+- generate_html      : Generate HTML file with responsive CSS wrapper
+  args: {"content":"<h1>Hello</h1>","file":"index.html","title":"My Page"}
+- generate_zip       : alias for archive_create_zip
+
+── AGENT INTELLIGENCE ────────────────────────────────
+- planner_phase      : Create structured plan with numbered steps
+  args: {"goal":"Build scraper","steps":["Install deps","Write code","Test","Export"]}
+- step_tracker       : Track step progress (start/complete/fail/status)
+  args: {"action":"complete","step_index":1,"note":"Done"}
+- loop_supervisor    : Monitor iteration budget, prevent infinite loops
+  args: {"action":"tick"} or {"action":"init","max_iterations":20}
+- tool_validator     : Validate tool arguments before calling
+  args: {"tool_name":"file_write","args":{"path":"out.txt"}}
+- reflection_pass    : Summarize completed work and lessons learned
+  args: {"goal":"Scrape data","completed_steps":["Step 1"],"outcome":"success"}
+- memory_store       : Store information to persistent memory with optional tag
+  args: {"content":"User prefers Python","tag":"preference"}
+- memory_retrieve    : Retrieve stored memories, optionally filtered
+  args: {"filter":"preference"}
+
+── SYSTEM UTILITIES ──────────────────────────────────
+- get_environment_variables : Read env vars (sensitive values auto-redacted)
+  args: {} or {"filter":"NODE"}
+- set_environment_variable  : Set an env var for current session
+  args: {"key":"DEBUG","value":"true"}
+- get_system_info    : OS, CPU, memory, Node version, disk info
+  args: {}
+- check_disk_usage   : Check disk space for a path
+  args: {"path":"/"}
+
 ═══════════════════════════════════════════════════════
 
 RULES:
@@ -143,9 +231,10 @@ RULES:
 2. After [TOOL RESULT] is received, analyze it and continue with the next step.
 3. When all steps are done, write your final answer in plain text (no TOOL_CALL).
 4. You MUST actually call tools to complete tasks — do not simulate or describe results.
-5. For complex tasks: break into steps, use message tool to report progress.
-6. Screenshots are saved to agent-workspace/screenshots/ — report the file path to user.
-7. The file_* tools use agent-workspace/ as root directory.
+5. For complex tasks: use planner_phase first, then step_tracker to track progress.
+6. Use loop_supervisor to prevent infinite loops in iterative tasks.
+7. Screenshots are saved to agent-workspace/screenshots/ — report the file path to user.
+8. The file_* and generate_* tools use agent-workspace/ as root directory.
 
 TASK:`;
 
@@ -394,6 +483,165 @@ async function runTool(name: string, args: Record<string, any>): Promise<string>
                 return r.entries.map((e, i) => `[${i + 1}] id=${e.id}\n    ${e.content}\n    (created: ${e.created_at.split('T')[0]})`).join('\n\n');
             }
             return r.message || 'OK';
+        }
+
+        // ── Alias: read_file / write_file / list_directory / delete_file ──
+        case 'read_file': return runTool('file_read', args);
+        case 'write_file': return runTool('file_write', args);
+        case 'list_directory': return runTool('file_list', args);
+        case 'delete_file': return runTool('file_delete', args);
+        case 'run_code': return runTool('code_execute', args);
+        case 'run_shell': return runTool('shell', args);
+        case 'fetch_url_content': return runTool('web_open_url', { ...args, url: args.url || args.path });
+
+        // ── Workspace / file ops ──
+        case 'create_directory': {
+            const r = createDirectory(args.path || args.dir || args.directory, args.recursive !== false);
+            return r.success ? r.message! : `Error: ${r.error}`;
+        }
+
+        case 'move_file': {
+            const r = moveFile(args.src || args.source || args.from, args.dest || args.destination || args.to);
+            return r.success ? r.message! : `Error: ${r.error}`;
+        }
+
+        case 'copy_file': {
+            const r = copyFile(args.src || args.source || args.from, args.dest || args.destination || args.to);
+            return r.success ? r.message! : `Error: ${r.error}`;
+        }
+
+        case 'get_project_structure': {
+            const r = await getProjectStructure(args.path || args.dir || '.', args.max_depth || 4);
+            return r.success ? `${r.message}\n\n${r.data}` : `Error: ${r.error}`;
+        }
+
+        case 'search_in_files': {
+            const r = await searchInFiles(args.query || args.pattern, args.path || args.dir || '.', args.glob || '*');
+            return r.success ? String(r.data) : `Error: ${r.error}`;
+        }
+
+        // ── Project management ──
+        case 'create_project': {
+            const r = createProject(args.name || args.project, args.template || 'blank');
+            return r.success ? `${r.message}\nFiles: ${r.data?.files?.join(', ')}\nPath: ${r.path}` : `Error: ${r.error}`;
+        }
+
+        case 'delete_project': {
+            const r = deleteProject(args.name || args.project, args.confirm === true);
+            return r.success ? r.message! : `Error: ${r.error}`;
+        }
+
+        case 'switch_workspace': {
+            const r = switchWorkspace(args.path || args.dir);
+            return r.success ? `${r.message}` : `Error: ${r.error}`;
+        }
+
+        // ── Code tools ──
+        case 'install_package': {
+            const r = await installPackage(args.package_name || args.package, args.manager || 'npm', args.global === true);
+            return `${r.message}\n${(r.output || '').slice(0, 2000)}`;
+        }
+
+        case 'debug_code': {
+            const r = await debugCode(args.code, args.language || 'python', args.error || '');
+            return `Status: ${r.message}\nAnalysis: ${r.data?.analysis}\nOutput:\n${(r.output || '').slice(0, 3000)}`;
+        }
+
+        case 'apply_patch': {
+            const r = await applyPatch(args.patch || args.patch_content, args.file || args.target_file, args.reverse === true);
+            return r.success ? r.message! : `Error: ${r.error}\n${(r.output || '').slice(0, 1000)}`;
+        }
+
+        // ── File generation ──
+        case 'generate_markdown': {
+            const r = generateMarkdown(args.content, args.file || args.path || 'output.md');
+            return r.success ? `${r.message} (${r.size} bytes)` : `Error: ${r.error}`;
+        }
+
+        case 'generate_json': {
+            const r = generateJson(args.data, args.file || args.path || 'output.json', args.indent || 2);
+            return r.success ? `${r.message} (${r.size} bytes)` : `Error: ${r.error}`;
+        }
+
+        case 'generate_csv': {
+            const r = generateCsv(args.data, args.file || args.path || 'output.csv', args.delimiter || ',');
+            return r.success ? `${r.message} (${r.size} bytes)` : `Error: ${r.error}`;
+        }
+
+        case 'generate_html': {
+            const r = generateHtml(args.content, args.file || args.path || 'output.html', args.title || 'Generated Page', args.wrap !== false);
+            return r.success ? `${r.message} (${r.size} bytes)` : `Error: ${r.error}`;
+        }
+
+        case 'generate_pdf': {
+            const r = await generatePdf(args.content, args.file || args.path || 'output.pdf', args.title || 'Generated Document', args.from_html === true);
+            return r.success ? `${r.message}` : `Error: ${r.error}`;
+        }
+
+        case 'generate_zip': return runTool('archive_create_zip', args);
+
+        // ── Agent intelligence ──
+        case 'planner_phase': {
+            const r = plannerPhase(args.goal, args.steps as string[], args.session_id || 'default');
+            return r.success ? `${r.message}\n${JSON.stringify(r.data, null, 2).slice(0, 2000)}` : `Error: ${r.error}`;
+        }
+
+        case 'step_tracker': {
+            const r = stepTracker(args.action, args.step_index, args.note || '');
+            return r.success ? `${r.message || ''}\n${JSON.stringify(r.data, null, 2).slice(0, 1500)}` : `Error: ${r.error}`;
+        }
+
+        case 'loop_supervisor': {
+            const r = loopSupervisor(args.action || 'tick', args.max_iterations || 30, args.note || '');
+            return r.success ? `${r.message}` : `Error: ${r.error} — Stop iterating.`;
+        }
+
+        case 'tool_validator': {
+            const r = toolValidator(args.tool_name, args.args || {});
+            return r.success ? r.message! : `Invalid: ${r.error}`;
+        }
+
+        case 'reflection_pass': {
+            const r = reflectionPass(args.completed_steps || [], args.goal || '', args.outcome || 'success', args.notes || '');
+            return r.success ? String(r.message) : `Error: ${r.error}`;
+        }
+
+        case 'memory_store': {
+            const r = memoryStore(args.content, args.tag || '');
+            return r.success ? r.message! : `Error: ${r.error}`;
+        }
+
+        case 'memory_retrieve': {
+            const r = memoryRetrieve(args.filter || '');
+            if (!r.success) return `Error: ${r.error}`;
+            if (!r.data || r.data.length === 0) return 'No memory entries found.';
+            return `${r.message}\n` + (r.data as any[]).map((e: any, i: number) => `[${i + 1}] ${e.content}`).join('\n');
+        }
+
+        // ── System utilities ──
+        case 'get_environment_variables': {
+            const r = getEnvironmentVariables(args.filter || '');
+            return r.success ? `${r.message}\n${JSON.stringify(r.data, null, 2).slice(0, 3000)}` : `Error: ${r.error}`;
+        }
+
+        case 'set_environment_variable': {
+            const r = setEnvironmentVariable(args.key || args.name, args.value);
+            return r.success ? r.message! : `Error: ${r.error}`;
+        }
+
+        case 'get_system_info': {
+            const r = await getSystemInfo();
+            return r.success ? JSON.stringify(r.data, null, 2).slice(0, 3000) : `Error: ${r.error}`;
+        }
+
+        case 'check_disk_usage': {
+            const r = await checkDiskUsage(args.path || '/');
+            return r.success ? String(r.data?.df_output) : `Error: ${r.error}`;
+        }
+
+        case 'check_website_status': {
+            const r = await checkWebsiteStatus(args.url || args.website, args.timeout || 10);
+            return `${r.message}\n${JSON.stringify(r.data, null, 2).slice(0, 500)}`;
         }
 
         // ── Message ──

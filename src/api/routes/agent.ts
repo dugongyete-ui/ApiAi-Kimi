@@ -196,6 +196,295 @@ const TOOLS_LIST = [
         arguments: { content: 'string — message content' },
         example: { name: 'message', arguments: { content: 'Starting web search...' } },
     },
+
+    // ── BASIC CODING AGENT (CORE) ──
+    {
+        name: 'read_file',
+        description: 'Read a file from the agent workspace (alias for file_read)',
+        arguments: { path: 'string — file path' },
+        example: { name: 'read_file', arguments: { path: 'notes.txt' } },
+    },
+    {
+        name: 'write_file',
+        description: 'Write/overwrite a file (alias for file_write)',
+        arguments: { path: 'string', content: 'string' },
+        example: { name: 'write_file', arguments: { path: 'output.txt', content: 'Hello!' } },
+    },
+    {
+        name: 'list_directory',
+        description: 'List files/directories in the workspace (alias for file_list)',
+        arguments: { path: 'string (optional)' },
+        example: { name: 'list_directory', arguments: { path: '.' } },
+    },
+    {
+        name: 'create_directory',
+        description: 'Create a new directory (and any missing parent directories)',
+        arguments: { path: 'string — directory path to create', recursive: 'boolean (optional, default true)' },
+        example: { name: 'create_directory', arguments: { path: 'my-project/src/utils' } },
+    },
+    {
+        name: 'delete_file',
+        description: 'Delete a file or directory (alias for file_delete)',
+        arguments: { path: 'string' },
+        example: { name: 'delete_file', arguments: { path: 'temp.txt' } },
+    },
+    {
+        name: 'move_file',
+        description: 'Move or rename a file/directory',
+        arguments: { src: 'string — source path', dest: 'string — destination path' },
+        example: { name: 'move_file', arguments: { src: 'draft.txt', dest: 'final/report.txt' } },
+    },
+    {
+        name: 'copy_file',
+        description: 'Copy a file to a new location',
+        arguments: { src: 'string — source path', dest: 'string — destination path' },
+        example: { name: 'copy_file', arguments: { src: 'template.html', dest: 'pages/about.html' } },
+    },
+
+    // ── CODE EXECUTION & DEBUGGING ──
+    {
+        name: 'run_code',
+        description: 'Run code in Python, JavaScript, TypeScript, Bash, or Ruby (alias for code_execute)',
+        arguments: { language: 'string — python|javascript|typescript|bash|ruby', code: 'string' },
+        example: { name: 'run_code', arguments: { language: 'python', code: "print('hello')" } },
+    },
+    {
+        name: 'run_shell',
+        description: 'Execute a shell command (alias for shell)',
+        arguments: { command: 'string' },
+        example: { name: 'run_shell', arguments: { command: 'ls -la' } },
+    },
+    {
+        name: 'install_package',
+        description: 'Install a package using npm, pip, or yarn',
+        arguments: {
+            package_name: 'string — package name (e.g. "requests", "axios")',
+            manager: 'string (optional) — npm|pip|pip3|yarn, default "npm"',
+            global: 'boolean (optional) — install globally, default false',
+        },
+        example: { name: 'install_package', arguments: { package_name: 'requests', manager: 'pip' } },
+    },
+    {
+        name: 'debug_code',
+        description: 'Run code and analyze any errors, returning error type, analysis, and suggestions for fixing',
+        arguments: {
+            code: 'string — code to debug',
+            language: 'string (optional) — python|javascript|typescript|bash, default "python"',
+            error: 'string (optional) — known error message to analyze',
+        },
+        example: { name: 'debug_code', arguments: { language: 'python', code: "import pandas\ndf = pandas.read_csv('data.csv')" } },
+    },
+    {
+        name: 'apply_patch',
+        description: 'Apply a unified diff patch to a file or the current working directory',
+        arguments: {
+            patch: 'string — unified diff patch content',
+            file: 'string (optional) — target file path (if patching a single file)',
+            reverse: 'boolean (optional) — apply patch in reverse, default false',
+        },
+        example: { name: 'apply_patch', arguments: { patch: '--- a/file.py\n+++ b/file.py\n@@ -1 +1 @@\n-old\n+new' } },
+    },
+
+    // ── PROJECT & WORKSPACE MANAGEMENT ──
+    {
+        name: 'create_project',
+        description: 'Scaffold a new project directory with boilerplate files',
+        arguments: {
+            name: 'string — project name (becomes directory name)',
+            template: 'string (optional) — node|python|web|blank, default "blank"',
+        },
+        example: { name: 'create_project', arguments: { name: 'my-api', template: 'node' } },
+    },
+    {
+        name: 'delete_project',
+        description: 'Delete an entire project directory (requires confirm=true as safety check)',
+        arguments: { name: 'string — project/directory name', confirm: 'boolean — must be true to proceed' },
+        example: { name: 'delete_project', arguments: { name: 'old-project', confirm: true } },
+    },
+    {
+        name: 'switch_workspace',
+        description: 'Set the working context to a subdirectory in the agent workspace',
+        arguments: { path: 'string — path relative to agent-workspace' },
+        example: { name: 'switch_workspace', arguments: { path: 'my-project' } },
+    },
+    {
+        name: 'get_project_structure',
+        description: 'Get a tree view of a project or directory structure',
+        arguments: {
+            path: 'string (optional) — starting directory, default "."',
+            max_depth: 'number (optional) — maximum depth to traverse, default 4',
+        },
+        example: { name: 'get_project_structure', arguments: { path: '.', max_depth: 3 } },
+    },
+    {
+        name: 'search_in_files',
+        description: 'Search for a text pattern across all files in a directory (like grep -rn)',
+        arguments: {
+            query: 'string — search text or pattern (case-insensitive)',
+            path: 'string (optional) — directory to search in, default "."',
+            glob: 'string (optional) — file pattern filter, e.g. "*.py" or "*.ts"',
+        },
+        example: { name: 'search_in_files', arguments: { query: 'def main', path: '.', glob: '*.py' } },
+    },
+
+    // ── WEB & NETWORK ──
+    {
+        name: 'fetch_url_content',
+        description: 'Fetch and extract text content from a URL (alias for web_open_url)',
+        arguments: { url: 'string — URL to fetch' },
+        example: { name: 'fetch_url_content', arguments: { url: 'https://example.com' } },
+    },
+    {
+        name: 'check_website_status',
+        description: 'Check if a website is up and measure response time — returns HTTP status code and latency',
+        arguments: {
+            url: 'string — website URL (e.g. "https://google.com")',
+            timeout: 'number (optional) — timeout in seconds, default 10',
+        },
+        example: { name: 'check_website_status', arguments: { url: 'https://google.com' } },
+    },
+
+    // ── FILE GENERATION ──
+    {
+        name: 'generate_pdf',
+        description: 'Generate a PDF file from text or HTML content (uses headless browser rendering)',
+        arguments: {
+            content: 'string — text or HTML content',
+            file: 'string (optional) — output file path, default "output.pdf"',
+            title: 'string (optional) — document title',
+            from_html: 'boolean (optional) — treat content as raw HTML, default false',
+        },
+        example: { name: 'generate_pdf', arguments: { content: 'Hello World\nThis is my first PDF.', file: 'report.pdf', title: 'My Report' } },
+    },
+    {
+        name: 'generate_markdown',
+        description: 'Write content to a Markdown (.md) file',
+        arguments: { content: 'string — markdown content', file: 'string (optional) — output path, default "output.md"' },
+        example: { name: 'generate_markdown', arguments: { content: '# Hello\n\nContent here.', file: 'notes.md' } },
+    },
+    {
+        name: 'generate_zip',
+        description: 'Create a ZIP archive from files/folders (alias for archive_create_zip)',
+        arguments: { path: 'string — output zip path', sources: 'array — files/folders to archive' },
+        example: { name: 'generate_zip', arguments: { path: 'output.zip', sources: ['file1.txt'] } },
+    },
+    {
+        name: 'generate_json',
+        description: 'Save data as a formatted JSON file',
+        arguments: { data: 'any — data to serialize (object, array, string)', file: 'string (optional) — output path', indent: 'number (optional) — indent spaces, default 2' },
+        example: { name: 'generate_json', arguments: { data: { name: 'test', score: 42 }, file: 'result.json' } },
+    },
+    {
+        name: 'generate_csv',
+        description: 'Generate a CSV file from an array of objects or 2D array',
+        arguments: {
+            data: 'array — array of objects (uses keys as headers) or array of arrays',
+            file: 'string (optional) — output file path, default "output.csv"',
+            delimiter: 'string (optional) — column delimiter, default ","',
+        },
+        example: { name: 'generate_csv', arguments: { data: [{ name: 'Alice', score: 95 }, { name: 'Bob', score: 87 }], file: 'scores.csv' } },
+    },
+    {
+        name: 'generate_html',
+        description: 'Generate an HTML file with optional full page wrapper (includes basic responsive CSS)',
+        arguments: {
+            content: 'string — HTML body content or full HTML document',
+            file: 'string (optional) — output path, default "output.html"',
+            title: 'string (optional) — page title',
+            wrap: 'boolean (optional) — wrap with full HTML structure, default true',
+        },
+        example: { name: 'generate_html', arguments: { content: '<h1>Hello</h1><p>World</p>', file: 'index.html', title: 'My Page' } },
+    },
+
+    // ── AGENT INTELLIGENCE LAYER ──
+    {
+        name: 'planner_phase',
+        description: 'Create a structured plan with numbered steps for a complex goal — tracks state across tool calls',
+        arguments: {
+            goal: 'string — the main objective',
+            steps: 'array of strings — ordered list of steps to complete the goal',
+            session_id: 'string (optional) — session identifier, default "default"',
+        },
+        example: { name: 'planner_phase', arguments: { goal: 'Build a web scraper', steps: ['Install dependencies', 'Write scraper code', 'Test scraper', 'Export results'] } },
+    },
+    {
+        name: 'step_tracker',
+        description: 'Track progress of plan steps — mark steps as started, completed, or failed; or get current status',
+        arguments: {
+            action: 'string — start|complete|fail|status',
+            step_index: 'number (required for start/complete/fail) — step number (1-based)',
+            note: 'string (optional) — additional note about the step',
+        },
+        example: { name: 'step_tracker', arguments: { action: 'complete', step_index: 1, note: 'requests installed successfully' } },
+    },
+    {
+        name: 'loop_supervisor',
+        description: 'Monitor iteration budget to prevent infinite loops — tick on each iteration, stops when max_iterations reached',
+        arguments: {
+            action: 'string — init|tick|reset|status',
+            max_iterations: 'number (optional, for init) — max allowed iterations, default 30',
+            note: 'string (optional) — label for this iteration',
+        },
+        example: { name: 'loop_supervisor', arguments: { action: 'tick', note: 'Processing item 5' } },
+    },
+    {
+        name: 'tool_validator',
+        description: 'Validate tool call arguments before executing — check required fields are present',
+        arguments: {
+            tool_name: 'string — name of the tool to validate',
+            args: 'object — the arguments you plan to pass to the tool',
+        },
+        example: { name: 'tool_validator', arguments: { tool_name: 'file_write', args: { path: 'out.txt' } } },
+    },
+    {
+        name: 'reflection_pass',
+        description: 'Generate a structured reflection on completed work — summarizes outcome, lessons learned, and next steps',
+        arguments: {
+            goal: 'string — what was attempted',
+            completed_steps: 'array of strings — steps that were completed',
+            outcome: 'string — success|partial|failed',
+            notes: 'string (optional) — additional observations',
+        },
+        example: { name: 'reflection_pass', arguments: { goal: 'Scrape news data', completed_steps: ['Search done', 'Data saved'], outcome: 'success' } },
+    },
+    {
+        name: 'memory_store',
+        description: 'Save information to persistent memory with optional tag (shortcut for memory_space_edits add)',
+        arguments: { content: 'string — content to remember', tag: 'string (optional) — category tag' },
+        example: { name: 'memory_store', arguments: { content: 'User prefers Python over JavaScript', tag: 'preference' } },
+    },
+    {
+        name: 'memory_retrieve',
+        description: 'Retrieve stored memories, optionally filtered by keyword (shortcut for memory_space_edits list)',
+        arguments: { filter: 'string (optional) — keyword to filter memories' },
+        example: { name: 'memory_retrieve', arguments: { filter: 'preference' } },
+    },
+
+    // ── SYSTEM UTILITIES ──
+    {
+        name: 'get_environment_variables',
+        description: 'Read environment variables — sensitive values (API keys, tokens, passwords) are redacted automatically',
+        arguments: { filter: 'string (optional) — keyword to filter variable names' },
+        example: { name: 'get_environment_variables', arguments: { filter: 'NODE' } },
+    },
+    {
+        name: 'set_environment_variable',
+        description: 'Set an environment variable for the current session (not persisted to disk)',
+        arguments: { key: 'string — variable name', value: 'string — variable value' },
+        example: { name: 'set_environment_variable', arguments: { key: 'DEBUG', value: 'true' } },
+    },
+    {
+        name: 'get_system_info',
+        description: 'Get system information: OS, CPU, memory usage, Node.js version, disk, and shell environment',
+        arguments: {},
+        example: { name: 'get_system_info', arguments: {} },
+    },
+    {
+        name: 'check_disk_usage',
+        description: 'Check disk space usage for a path',
+        arguments: { path: 'string (optional) — directory to check, default "/"' },
+        example: { name: 'check_disk_usage', arguments: { path: '/' } },
+    },
 ];
 
 function resolveAuth(request: Request): string {

@@ -183,12 +183,25 @@ API "Claude" dan "Gemini" di sini BUKAN API asli. Ini adalah ADAPTER yang:
 
 | Mode | Body | Auth | Deskripsi |
 |------|------|------|-----------|
-| List tools | `{ "list_tools": true }` | Tidak perlu | Daftar 23 tools yang tersedia |
+| List tools | `{ "list_tools": true }` | Tidak perlu | Daftar 65 tools yang tersedia |
 | Task runner | `{ "task": "...", "context": "..." }` | JWT token | Jalankan task singkat (SSE stream) |
 | Chat agent | `{ "messages": [...], "conversation_id": "..." }` | JWT token | OpenAI-style chat dengan agent tools (SSE stream) |
 
-**Tools yang tersedia (23 tools):**
-`shell`, `browser`, `browser_navigate`, `browser_screenshot`, `browser_click`, `browser_type`, `browser_scroll`, `browser_get_text`, `browser_eval`, `web_search`, `http_request`, `code_execute` (python/js/ts/bash/ruby), `file_read/write/append/list/delete`, `archive_create_zip/extract_zip/create_tar/extract_tar/list`, `message`
+**Tools yang tersedia (65 tools dalam 10 kategori):**
+
+| Kategori | Tools |
+|----------|-------|
+| Basic File Ops | `read_file`, `write_file`, `list_directory`, `create_directory`, `delete_file`, `move_file`, `copy_file` |
+| Code Execution | `run_code`, `run_shell`, `code_execute`, `shell`, `install_package`, `debug_code`, `apply_patch` |
+| Project Mgmt | `create_project`, `delete_project`, `switch_workspace`, `get_project_structure`, `search_in_files` |
+| Web & Network | `web_search`, `web_open_url`, `http_request`, `fetch_url_content`, `check_website_status` |
+| Browser Auto | `browser`, `browser_navigate`, `browser_screenshot`, `browser_click`, `browser_type`, `browser_scroll`, `browser_get_text`, `browser_eval` |
+| Image Search | `search_image_by_text`, `search_image_by_image` |
+| Data Sources | `get_data_source`, `get_datasource_desc` (yahoo_finance, binance_crypto, world_bank, arxiv, google_scholar) |
+| File Generation | `generate_pdf`, `generate_markdown`, `generate_json`, `generate_csv`, `generate_html`, `generate_zip` |
+| Agent Intelligence | `planner_phase`, `step_tracker`, `loop_supervisor`, `tool_validator`, `reflection_pass`, `memory_store`, `memory_retrieve`, `memory_space_edits` |
+| Archives | `archive_create_zip`, `archive_extract_zip`, `archive_create_tar`, `archive_extract_tar`, `archive_list` |
+| System Utils | `get_environment_variables`, `set_environment_variable`, `get_system_info`, `check_disk_usage` |
 
 ### Endpoint Token Management (Server-Side)
 | Endpoint | Method | Deskripsi | Status |
