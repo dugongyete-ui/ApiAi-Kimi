@@ -31,6 +31,9 @@ import {
     getEnvironmentVariables, setEnvironmentVariable, getSystemInfo,
     checkDiskUsage, checkWebsiteStatus,
 } from '@/lib/tools/system-utils.ts';
+import { generateDocx, generateXlsx, generatePptx } from '@/lib/tools/office-generator.ts';
+import { placesSearch, placesMapDisplay, weatherFetch } from '@/lib/tools/geo-weather.ts';
+import { fetchSportsData, messageCompose, recipeDisplay, strReplace, presentFiles } from '@/lib/tools/specialized.ts';
 
 const MAX_ITERATIONS = 30;
 const MAX_TOOL_RESULT_LEN = 8000;
@@ -643,6 +646,124 @@ async function runTool(name: string, args: Record<string, any>): Promise<string>
             const r = await checkWebsiteStatus(args.url || args.website, args.timeout || 10);
             return `${r.message}\n${JSON.stringify(r.data, null, 2).slice(0, 500)}`;
         }
+
+        // ── Office documents ──
+        case 'generate_docx': {
+            const r = await generateDocx(args.content || args, args.file || args.path || 'output.docx');
+            return r.success ? r.message! : `Error: ${r.error}`;
+        }
+
+        case 'generate_xlsx': {
+            const r = await generateXlsx(args.sheets || [args], args.file || args.path || 'output.xlsx');
+            return r.success ? r.message! : `Error: ${r.error}`;
+        }
+
+        case 'generate_pptx': {
+            const r = await generatePptx(args.slides || [], args.file || args.path || 'output.pptx', args.theme);
+            return r.success ? r.message! : `Error: ${r.error}`;
+        }
+
+        // ── Places & Maps ──
+        case 'places_search': {
+            const r = await placesSearch(args.query, args.location, args.category, args.limit || 10);
+            if (!r.success) return `Error: ${r.error}`;
+            if (!r.data || r.data.length === 0) return `No places found for "${args.query}"`;
+            const places = r.data as any[];
+            return `${r.message}\n\n` + places.map((p: any, i: number) =>
+                `${i + 1}. ${p.name}\n   Type: ${p.type} | Lat: ${p.lat}, Lon: ${p.lon}\n   Address: ${p.display_name}`
+            ).join('\n\n').slice(0, MAX_TOOL_RESULT_LEN);
+        }
+
+        case 'places_map_display': {
+            const r = await placesMapDisplay(args.places || [], {
+                title: args.title,
+                filePath: args.file || args.path,
+                center: args.center,
+                zoom: args.zoom,
+                itinerary: args.itinerary,
+            });
+            return r.success ? `${r.message}\nFile: ${r.data?.path}` : `Error: ${r.error}`;
+        }
+
+        // ── Weather ──
+        case 'weather_fetch': {
+            const r = await weatherFetch(args.location || args.city || args.query, args.days || 3);
+            if (!r.success) return `Error: ${r.error}`;
+            const d = r.data;
+            const curr = d.current;
+            const forecast = d.forecast || [];
+            let out = `Weather: ${curr.location}\n`;
+            out += `Now: ${curr.temperature_c}°C (feels ${curr.feels_like_c}°C), ${curr.condition}\n`;
+            out += `Humidity: ${curr.humidity_pct}% | Wind: ${curr.wind_kmh} km/h | Precip: ${curr.precipitation_mm}mm\n\n`;
+            out += `Forecast (${forecast.length} days):\n`;
+            for (const f of forecast) {
+                out += `  ${f.date}: ${f.condition}, ${f.temp_min_c}–${f.temp_max_c}°C, rain ${f.precipitation_mm}mm\n`;
+            }
+            return out.slice(0, MAX_TOOL_RESULT_LEN);
+        }
+
+        // ── Sports ──
+        case 'fetch_sports_data': {
+            const r = await fetchSportsData(args.league, args.type || 'scores');
+            if (!r.success) return `Error: ${r.error}`;
+            return `${r.message}\n${JSON.stringify(r.data, null, 2).slice(0, MAX_TOOL_RESULT_LEN)}`;
+        }
+
+        // ── Message compose ──
+        case 'message_compose': {
+            const r = messageCompose(args.type || 'email', {
+                to: args.to,
+                from: args.from,
+                subject: args.subject,
+                body: args.body || args.content || '',
+                tone: args.tone || 'professional',
+                channel: args.channel,
+                signature: args.signature,
+            });
+            return r.success ? `${r.message}\n\n---\n${r.data?.message}` : `Error: ${r.error}`;
+        }
+
+        // ── Recipe ──
+        case 'recipe_display': {
+            const r = await recipeDisplay(args.query || args.recipe, {
+                servings: args.servings || 1,
+                filePath: args.file || args.path,
+                format: args.format || 'text',
+            });
+            if (!r.success) return `Error: ${r.error}`;
+            return args.format === 'html'
+                ? `${r.message}`
+                : r.data?.text || JSON.stringify(r.data?.recipe, null, 2).slice(0, MAX_TOOL_RESULT_LEN);
+        }
+
+        // ── str_replace ──
+        case 'str_replace': {
+            const r = strReplace(
+                args.file || args.path,
+                args.old_str || args.old || args.find,
+                args.new_str !== undefined ? args.new_str : (args.new || args.replace || ''),
+                args.occurrences || 'first'
+            );
+            return r.success ? r.message! : `Error: ${r.error}`;
+        }
+
+        // ── present_files ──
+        case 'present_files': {
+            const r = presentFiles(args.path || args.dir || '.', args.recursive === true);
+            return r.success ? r.message! : `Error: ${r.error}`;
+        }
+
+        // ── Aliases ──
+        case 'web_fetch': return runTool('web_open_url', { ...args, url: args.url || args.path });
+        case 'bash_tool': return runTool('shell', { command: args.command || args.bash || args.cmd });
+        case 'view': {
+            if (args.path && (args.path.endsWith('/') || !args.path.includes('.'))) {
+                return runTool('file_list', args);
+            }
+            return runTool('file_read', args);
+        }
+        case 'create_file': return runTool('file_write', args);
+        case 'image_search': return runTool('search_image_by_text', args);
 
         // ── Message ──
         case 'message':
