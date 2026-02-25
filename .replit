@@ -36,7 +36,7 @@ externalPort = 80
 expertMode = true
 
 [deployment]
-deploymentTarget = "vm"
+deploymentTarget = "cloudrun"
 run = ["node", "--enable-source-maps", "--no-node-snapshot", "dist/index.js"]
 build = ["npm", "run", "build"]
 publicDir = "dist"
