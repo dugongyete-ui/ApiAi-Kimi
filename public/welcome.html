@@ -1018,16 +1018,6 @@
               messages: [{ role: 'user', content: 'Cek versi node.js dan npm yang terinstall, lalu list file di direktori root' }],
               stream: true
             }
-          },
-          {
-            method: 'POST', path: '/v1/agent/run', desc: 'Jalankan Task Agent',
-            description: 'Cara mudah menjalankan task agent. Cukup kirim { task: "..." } dan agent akan mengerjakan dengan tools yang tersedia.',
-            params: [],
-            hasBody: true, hasModel: false,
-            defaultBody: {
-              task: 'Cari informasi terbaru tentang model AI Kimi K2, lalu tulis rangkumannya ke file summary.txt',
-              context: 'Kamu adalah research assistant yang membantu mencari dan merangkum informasi.'
-            }
           }
         ]
       },
