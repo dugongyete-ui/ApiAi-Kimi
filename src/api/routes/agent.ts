@@ -485,6 +485,133 @@ const TOOLS_LIST = [
         arguments: { path: 'string (optional) — directory to check, default "/"' },
         example: { name: 'check_disk_usage', arguments: { path: '/' } },
     },
+
+    // ── BROWSER (HTML content) ──
+    {
+        name: 'browser_get_html',
+        description: 'Get the raw HTML source of the current page or a specific element',
+        arguments: { selector: 'string (optional) — CSS selector, returns full page HTML if omitted' },
+        example: { name: 'browser_get_html', arguments: { selector: '#main' } },
+    },
+
+    // ── OFFICE DOCUMENT GENERATION ──
+    {
+        name: 'generate_docx',
+        description: 'Generate a Microsoft Word (.docx) document. Supports simple text string OR structured sections.',
+        arguments: {
+            content: 'string — plain text or markdown content (simple mode)',
+            title: 'string (optional) — document title',
+            sections: 'array (optional, advanced) — structured sections: [{ heading, heading_level, paragraphs, bullet_list, table }]',
+            file: 'string (optional) — output file path, default "output.docx"',
+        },
+        example: { name: 'generate_docx', arguments: { title: 'My Report', content: '# Introduction\n\nThis is my report.\n\n- Point 1\n- Point 2', file: 'report.docx' } },
+    },
+    {
+        name: 'generate_xlsx',
+        description: 'Generate a Microsoft Excel (.xlsx) spreadsheet. Pass data as array of objects, or use sheets for multi-sheet.',
+        arguments: {
+            data: 'array of objects — keys become column headers, values become rows (simple mode)',
+            sheet: 'string (optional) — sheet name, default "Sheet1"',
+            headers: 'array of strings (optional) — explicit column headers',
+            rows: 'array of arrays (optional) — data rows when using headers',
+            sheets: 'array (optional, advanced) — multi-sheet: [{ name, headers, rows, column_widths }]',
+            file: 'string (optional) — output file path, default "output.xlsx"',
+        },
+        example: { name: 'generate_xlsx', arguments: { data: [{ name: 'Alice', score: 95 }, { name: 'Bob', score: 87 }], file: 'scores.xlsx' } },
+    },
+    {
+        name: 'generate_pptx',
+        description: 'Generate a Microsoft PowerPoint (.pptx) presentation from an array of slides',
+        arguments: {
+            slides: 'array — each slide: { title: string, subtitle?: string, content?: string | string[], bullet_points?: string[], table?: {headers, rows} }',
+            file: 'string (optional) — output file path, default "output.pptx"',
+            theme: 'object (optional) — { accent: "hex-color", background: "hex-color" }',
+        },
+        example: { name: 'generate_pptx', arguments: { slides: [{ title: 'My Presentation', subtitle: 'By Kimi Agent' }, { title: 'Overview', bullet_points: ['Point 1', 'Point 2', 'Point 3'] }], file: 'slides.pptx' } },
+    },
+
+    // ── GEO & WEATHER ──
+    {
+        name: 'places_search',
+        description: 'Search for places, businesses, or locations using a query (returns name, address, coordinates)',
+        arguments: {
+            query: 'string — search query (e.g. "coffee shops in Tokyo")',
+            limit: 'number (optional) — max results, default 5',
+        },
+        example: { name: 'places_search', arguments: { query: 'restaurants near Shibuya Tokyo', limit: 5 } },
+    },
+    {
+        name: 'places_map_display',
+        description: 'Generate a map display URL for a location or coordinates',
+        arguments: {
+            query: 'string (optional) — place name or address',
+            lat: 'number (optional) — latitude',
+            lon: 'number (optional) — longitude',
+            zoom: 'number (optional) — zoom level 1-20, default 14',
+        },
+        example: { name: 'places_map_display', arguments: { query: 'Eiffel Tower, Paris' } },
+    },
+    {
+        name: 'weather_fetch',
+        description: 'Get current weather and forecast for a location',
+        arguments: {
+            location: 'string — city name, address, or "lat,lon" coordinates',
+            units: 'string (optional) — metric|imperial|kelvin, default "metric"',
+            days: 'number (optional) — forecast days (1-7), default 3',
+        },
+        example: { name: 'weather_fetch', arguments: { location: 'Tokyo', units: 'metric', days: 3 } },
+    },
+
+    // ── SPECIALIZED ──
+    {
+        name: 'fetch_sports_data',
+        description: 'Fetch live or recent sports data including scores, standings, and match results',
+        arguments: {
+            sport: 'string — football|basketball|tennis|baseball|cricket|rugby',
+            query: 'string — team name, league, or tournament',
+            type: 'string (optional) — scores|standings|fixtures|results, default "scores"',
+        },
+        example: { name: 'fetch_sports_data', arguments: { sport: 'football', query: 'Premier League', type: 'standings' } },
+    },
+    {
+        name: 'str_replace',
+        description: 'Find and replace text within a file (exact string match)',
+        arguments: {
+            path: 'string — file path in agent workspace',
+            old_str: 'string — exact text to find',
+            new_str: 'string — replacement text',
+        },
+        example: { name: 'str_replace', arguments: { path: 'index.html', old_str: '<title>Old</title>', new_str: '<title>New</title>' } },
+    },
+    {
+        name: 'present_files',
+        description: 'Present one or more files as downloadable output to the user — renders a summary with file names and sizes',
+        arguments: {
+            files: 'array of strings — file paths relative to agent workspace',
+            message: 'string (optional) — accompanying message to display',
+        },
+        example: { name: 'present_files', arguments: { files: ['report.pdf', 'data.csv'], message: 'Here are your generated files' } },
+    },
+    {
+        name: 'message_compose',
+        description: 'Compose a structured message (email, SMS, notification) with subject and body',
+        arguments: {
+            type: 'string — email|sms|notification',
+            to: 'string — recipient',
+            subject: 'string (optional) — subject line (for email)',
+            body: 'string — message body',
+        },
+        example: { name: 'message_compose', arguments: { type: 'email', to: 'user@example.com', subject: 'Report Ready', body: 'Your report has been generated.' } },
+    },
+    {
+        name: 'recipe_display',
+        description: 'Search for and display a recipe with ingredients and steps',
+        arguments: {
+            query: 'string — dish name or ingredient-based search',
+            dietary: 'string (optional) — vegetarian|vegan|gluten-free|keto|paleo',
+        },
+        example: { name: 'recipe_display', arguments: { query: 'chocolate chip cookies', dietary: 'vegetarian' } },
+    },
 ];
 
 function resolveAuth(request: Request): string {
@@ -517,6 +644,37 @@ function resolveAuth(request: Request): string {
 export default {
 
     prefix: '/v1/agent',
+
+    get: {
+
+        /**
+         * GET /v1/agent/tools
+         * Returns the full list of available agent tools with descriptions and examples.
+         */
+        '/tools': async (_request: Request) => {
+            return {
+                object: 'agent.tools',
+                count: TOOLS_LIST.length,
+                tools: TOOLS_LIST,
+                usage: {
+                    list_tools_get:  'GET  /v1/agent/tools',
+                    list_tools_post: 'POST /v1/agent/completions  { "list_tools": true }',
+                    run_task:        'POST /v1/agent/completions  { "task": "...", "model": "kimi" }',
+                    chat:            'POST /v1/agent/completions  { "messages": [...], "model": "kimi" }',
+                },
+                notes: [
+                    'All agent requests use: Authorization: Bearer <your-api-key>',
+                    'Responses stream as Server-Sent Events (SSE)',
+                    'SSE event types: agent_start, tool_call, tool_result, agent_done, agent_error, agent_limit',
+                    'Standard OpenAI chat.completion.chunk events included for final content',
+                    'Shell commands run in a real Linux environment',
+                    'Files are stored in agent-workspace/ directory',
+                    `Max iterations per agent run: ${30}`,
+                ],
+            };
+        },
+
+    },
 
     post: {
 

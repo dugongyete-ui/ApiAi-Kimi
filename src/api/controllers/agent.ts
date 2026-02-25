@@ -649,17 +649,57 @@ async function runTool(name: string, args: Record<string, any>): Promise<string>
 
         // ── Office documents ──
         case 'generate_docx': {
-            const r = await generateDocx(args.content || args, args.file || args.path || 'output.docx');
+            let docContent: any;
+            if (args.sections) {
+                docContent = { title: args.title, sections: args.sections };
+            } else if (args.content && typeof args.content === 'object' && args.content.sections) {
+                docContent = args.content;
+            } else {
+                const text = typeof args.content === 'string' ? args.content : JSON.stringify(args.content || args.text || '');
+                const lines = text.split('\n');
+                const paragraphs = lines.filter((l: string) => l.trim());
+                docContent = {
+                    title: args.title || 'Document',
+                    sections: [{ paragraphs }],
+                };
+            }
+            const r = await generateDocx(docContent, args.file || args.path || 'output.docx');
             return r.success ? r.message! : `Error: ${r.error}`;
         }
 
         case 'generate_xlsx': {
-            const r = await generateXlsx(args.sheets || [args], args.file || args.path || 'output.xlsx');
+            let sheets: any[];
+            if (args.sheets && Array.isArray(args.sheets)) {
+                sheets = args.sheets;
+            } else if (args.data && Array.isArray(args.data)) {
+                const data = args.data as any[];
+                if (data.length > 0 && typeof data[0] === 'object' && !Array.isArray(data[0])) {
+                    const headers = Object.keys(data[0]);
+                    const rows = data.map((row: any) => headers.map(h => row[h] ?? null));
+                    sheets = [{ name: args.sheet || 'Sheet1', headers, rows }];
+                } else {
+                    sheets = [{ name: args.sheet || 'Sheet1', rows: data }];
+                }
+            } else if (args.headers || args.rows) {
+                sheets = [{ name: args.sheet || 'Sheet1', headers: args.headers, rows: args.rows || [] }];
+            } else {
+                sheets = [{ name: 'Sheet1', rows: [] }];
+            }
+            const r = await generateXlsx(sheets, args.file || args.path || 'output.xlsx');
             return r.success ? r.message! : `Error: ${r.error}`;
         }
 
         case 'generate_pptx': {
-            const r = await generatePptx(args.slides || [], args.file || args.path || 'output.pptx', args.theme);
+            const rawSlides = args.slides || [];
+            const slides = rawSlides.map((s: any) => ({
+                title: s.title || 'Slide',
+                subtitle: s.subtitle,
+                content: typeof s.content === 'string' ? s.content.split('\n').filter(Boolean) : (s.content || undefined),
+                bullet_points: s.bullet_points || s.bullets || undefined,
+                table: s.table || undefined,
+                layout: s.layout || undefined,
+            }));
+            const r = await generatePptx(slides, args.file || args.path || 'output.pptx', args.theme);
             return r.success ? r.message! : `Error: ${r.error}`;
         }
 

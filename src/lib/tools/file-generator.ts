@@ -142,7 +142,26 @@ ${content}
     }
 }
 
-// ─── PDF (HTML → PDF via inline base64 / basic PDF structure) ─────────────────
+// ─── PDF (pdfkit — pure JS, no browser dependency) ───────────────────────────
+
+function stripHtml(html: string): string {
+    return html
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/p>/gi, '\n\n')
+        .replace(/<\/h[1-6]>/gi, '\n')
+        .replace(/<\/li>/gi, '\n')
+        .replace(/<\/tr>/gi, '\n')
+        .replace(/<\/td>/gi, ' | ')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&nbsp;/g, ' ')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+}
 
 export async function generatePdf(
     content: string,
@@ -156,37 +175,43 @@ export async function generatePdf(
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
     try {
-        // Use Playwright to render HTML → PDF
-        const { chromium } = await import('playwright');
-        const browser = await chromium.launch({ headless: true });
-        const page = await browser.newPage();
+        const PDFDocument = (await import('pdfkit')).default;
+        const doc = new PDFDocument({ margin: 72, size: 'A4', info: { Title: title, Creator: 'Kimi Agent' } });
 
-        const html = fromHtml && content.trim().startsWith('<')
-            ? content
-            : `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>${title}</title>
-<style>
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 2cm; line-height: 1.6; color: #222; font-size: 12pt; }
-  h1,h2,h3 { color: #111; page-break-after: avoid; }
-  table { border-collapse: collapse; width: 100%; margin: 1em 0; }
-  th, td { border: 1px solid #ccc; padding: 6px 10px; }
-  th { background: #f0f0f0; }
-  pre, code { font-family: 'Courier New', monospace; background: #f5f5f5; padding: 2px 6px; font-size: 10pt; }
-  pre { padding: 12px; border-radius: 4px; page-break-inside: avoid; white-space: pre-wrap; word-break: break-word; }
-  @page { margin: 2cm; }
-</style>
-</head>
-<body>
-${content.replace(/\n/g, '<br>')}
-</body>
-</html>`;
+        const stream = fs.createWriteStream(out);
+        doc.pipe(stream);
 
-        await page.setContent(html, { waitUntil: 'networkidle' });
-        await page.pdf({ path: out, format: 'A4', printBackground: true, margin: { top: '2cm', bottom: '2cm', left: '2cm', right: '2cm' } });
-        await browser.close();
+        const rawText = fromHtml ? stripHtml(content) : content;
+        const lines = rawText.split('\n');
+
+        for (const line of lines) {
+            const trimmed = line.trim();
+
+            if (trimmed.startsWith('# ') && !fromHtml) {
+                doc.font('Helvetica-Bold').fontSize(20).fillColor('#111111').text(trimmed.slice(2), { paragraphGap: 6 });
+                doc.font('Helvetica').fontSize(12).fillColor('#222222');
+            } else if (trimmed.startsWith('## ') && !fromHtml) {
+                doc.moveDown(0.4).font('Helvetica-Bold').fontSize(16).fillColor('#222222').text(trimmed.slice(3), { paragraphGap: 4 });
+                doc.font('Helvetica').fontSize(12).fillColor('#222222');
+            } else if (trimmed.startsWith('### ') && !fromHtml) {
+                doc.moveDown(0.3).font('Helvetica-Bold').fontSize(13).fillColor('#333333').text(trimmed.slice(4), { paragraphGap: 3 });
+                doc.font('Helvetica').fontSize(12).fillColor('#222222');
+            } else if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+                doc.font('Helvetica').fontSize(12).fillColor('#222222')
+                    .text('  •  ' + trimmed.slice(2), { indent: 20, paragraphGap: 2 });
+            } else if (trimmed === '') {
+                doc.moveDown(0.5);
+            } else {
+                doc.font('Helvetica').fontSize(12).fillColor('#222222').text(trimmed, { paragraphGap: 3, lineGap: 2 });
+            }
+        }
+
+        doc.end();
+
+        await new Promise<void>((resolve, reject) => {
+            stream.on('finish', resolve);
+            stream.on('error', reject);
+        });
 
         const size = fs.statSync(out).size;
         return { success: true, path: out, size, message: `PDF saved: ${out} (${(size / 1024).toFixed(1)} KB)` };

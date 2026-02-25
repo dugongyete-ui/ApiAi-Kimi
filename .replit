@@ -36,7 +36,7 @@ externalPort = 80
 expertMode = true
 
 [deployment]
-deploymentTarget = "autoscale"
-run = ["sh", "-c", "node --enable-source-maps --no-node-snapshot dist/index.js"]
-build = ["sh", "-c", "npm run build"]
+deploymentTarget = "vm"
+run = ["node", "--enable-source-maps", "--no-node-snapshot", "dist/index.js"]
+build = ["npm", "run", "build"]
 publicDir = "dist"

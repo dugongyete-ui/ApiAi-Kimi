@@ -1,0 +1,48 @@
+{
+  "plan": {
+    "id": "plan_1772006187589",
+    "session_id": "test-session",
+    "goal": "Test goal",
+    "steps": [
+      {
+        "index": 1,
+        "description": "Step 1",
+        "status": "done",
+        "note": "Done",
+        "updated_at": "2026-02-25T07:56:27.592Z"
+      },
+      {
+        "index": 2,
+        "description": "Step 2",
+        "status": "pending"
+      }
+    ],
+    "created_at": "2026-02-25T07:56:27.589Z",
+    "total_steps": 2,
+    "completed_steps": 1
+  },
+  "loop_state": {
+    "iteration": 0,
+    "max": 10,
+    "history": [],
+    "started_at": "2026-02-25T07:56:27.592Z"
+  },
+  "last_reflection": {
+    "id": "reflection_1772006187594",
+    "goal": "Test goal",
+    "outcome": "success",
+    "completed_steps": [
+      "Step done"
+    ],
+    "notes": "All good",
+    "lessons": [
+      "Task completed successfully. Record what approach worked."
+    ],
+    "created_at": "2026-02-25T07:56:27.594Z",
+    "plan_summary": {
+      "total": 2,
+      "completed": 1,
+      "failed": 0
+    }
+  }
+}
