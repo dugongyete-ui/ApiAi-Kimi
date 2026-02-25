@@ -13,6 +13,7 @@ Project ini di-clone dari GitHub (`kimi-free-api-fix`) dan telah dikonfigurasi u
 - Token auth tersimpan di server (valid sampai 2026-03-18)
 - Streaming per-kata SUDAH BERFUNGSI (true streaming via Connect RPC)
 - Melanjutkan percakapan (conversation continuation) SUDAH BERFUNGSI via chatId
+- **TOOL CALLING NYATA SUDAH BERFUNGSI** via `/v1/chat/completions` dengan parameter `tools`
 
 ## Project Architecture
 
