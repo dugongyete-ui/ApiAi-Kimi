@@ -9,6 +9,7 @@ import gemini from './gemini.ts';
 import claude from './claude.ts';
 import auth from './auth.ts';
 import agent from './agent.ts';
+import testTools from './test-tools.ts';
 
 export default [
     {
@@ -33,5 +34,6 @@ export default [
     gemini,
     claude,
     auth,
-    agent
+    agent,
+    testTools
 ];

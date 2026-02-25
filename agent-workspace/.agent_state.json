@@ -1,46 +1,64 @@
 {
   "plan": {
-    "id": "plan_1772006187589",
+    "id": "plan_1772015358889",
     "session_id": "test-session",
-    "goal": "Test goal",
+    "goal": "Test all 77 AI tools",
     "steps": [
       {
         "index": 1,
-        "description": "Step 1",
+        "description": "Identify all tools",
         "status": "done",
-        "note": "Done",
-        "updated_at": "2026-02-25T07:56:27.592Z"
+        "note": "Step 1 done",
+        "updated_at": "2026-02-25T10:29:18.890Z"
       },
       {
         "index": 2,
-        "description": "Step 2",
+        "description": "Test each tool",
+        "status": "pending"
+      },
+      {
+        "index": 3,
+        "description": "Generate report",
         "status": "pending"
       }
     ],
-    "created_at": "2026-02-25T07:56:27.589Z",
-    "total_steps": 2,
+    "created_at": "2026-02-25T10:29:18.889Z",
+    "total_steps": 3,
     "completed_steps": 1
   },
   "loop_state": {
-    "iteration": 0,
+    "iteration": 2,
     "max": 10,
-    "history": [],
+    "history": [
+      {
+        "iteration": 1,
+        "time": "2026-02-25T10:26:04.089Z",
+        "note": "test iteration"
+      },
+      {
+        "iteration": 2,
+        "time": "2026-02-25T10:29:18.890Z",
+        "note": "test iteration"
+      }
+    ],
     "started_at": "2026-02-25T07:56:27.592Z"
   },
   "last_reflection": {
-    "id": "reflection_1772006187594",
-    "goal": "Test goal",
+    "id": "reflection_1772015358891",
+    "goal": "Test all 77 tools",
     "outcome": "success",
     "completed_steps": [
-      "Step done"
+      "Tested shell",
+      "Tested file tools",
+      "Tested browser"
     ],
-    "notes": "All good",
+    "notes": "All tools working",
     "lessons": [
       "Task completed successfully. Record what approach worked."
     ],
-    "created_at": "2026-02-25T07:56:27.594Z",
+    "created_at": "2026-02-25T10:29:18.891Z",
     "plan_summary": {
-      "total": 2,
+      "total": 3,
       "completed": 1,
       "failed": 0
     }

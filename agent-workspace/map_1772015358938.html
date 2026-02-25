@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paris Landmarks</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;display:flex;flex-direction:column;height:100vh;background:#f5f5f5}
+h1{background:#2E75B6;color:#fff;margin:0;padding:12px 20px;font-size:1.2rem}
+.container{display:flex;flex:1;overflow:hidden}
+#map{flex:2;min-height:400px}
+.sidebar{flex:1;overflow-y:auto;padding:12px;max-width:340px;background:#fff;border-left:1px solid #ddd}
+.place-card{display:flex;gap:10px;align-items:flex-start;padding:10px;margin-bottom:8px;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;transition:background .2s}
+.place-card:hover{background:#f0f7ff}
+.num{background:#2E75B6;color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;flex-shrink:0}
+.tag{background:#e8f0fe;color:#1a73e8;padding:2px 6px;border-radius:4px;font-size:11px;margin-left:6px}
+p{margin:4px 0;font-size:13px;color:#555}
+small{color:#999;font-size:11px}
+.itinerary{background:#f8f9fa;border:1px solid #e0e0e0;border-radius:8px;padding:12px;margin-top:12px}
+.itinerary h3{margin:0 0 8px;font-size:14px;color:#333}
+.itinerary ol{margin:0;padding-left:18px;font-size:13px;color:#444}
+.itinerary li{margin-bottom:4px}
+</style>
+</head>
+<body>
+<h1>📍 Paris Landmarks</h1>
+<div class="container">
+  <div id="map"></div>
+  <div class="sidebar">
+    <h3 style="margin-top:0">Places (2)</h3>
+    
+        <div class="place-card" onclick="map.setView([48.8584,2.2945],15)">
+            <span class="num">1</span>
+            <div>
+                <b>Eiffel Tower</b>
+                <span class="tag">Tourist</span>
+                <p>Famous Paris landmark</p>
+                <small>📍 48.85840, 2.29450</small>
+            </div>
+        </div>
+    
+        <div class="place-card" onclick="map.setView([48.8606,2.3376],15)">
+            <span class="num">2</span>
+            <div>
+                <b>Louvre Museum</b>
+                <span class="tag">Museum</span>
+                <p>World-famous art museum</p>
+                <small>📍 48.86060, 2.33760</small>
+            </div>
+        </div>
+    
+    
+  </div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+var map = L.map('map').setView([48.8584, 2.2945], 14);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors', maxZoom: 19
+}).addTo(map);
+
+        var marker0 = L.marker([48.8584, 2.2945]).addTo(map);
+        marker0.bindPopup('<b>Eiffel Tower</b><br/><i>Tourist</i><br/>Famous Paris landmark');
+    
+
+        var marker1 = L.marker([48.8606, 2.3376]).addTo(map);
+        marker1.bindPopup('<b>Louvre Museum</b><br/><i>Museum</i><br/>World-famous art museum');
+    
+var group = new L.featureGroup([marker0,marker1]); map.fitBounds(group.getBounds().pad(0.1));
+</script>
+</body>
+</html>

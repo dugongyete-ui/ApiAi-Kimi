@@ -1,0 +1,6 @@
+--- a/agent-workspace/patch_target.txt
++++ b/agent-workspace/patch_target.txt
+@@ -1,2 +1,2 @@
+-Hello World
++Hello Kimi AI
+ Second line

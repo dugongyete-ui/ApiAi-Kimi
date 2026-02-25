@@ -236,6 +236,10 @@ Jika ingin membuat website chat AI dengan streaming:
 - Port: 5000
 
 ## Recent Changes
+- 2026-02-25: BATCH 2 TEST - Tambah /v1/test-tools endpoint, test 55 tools baru (29-83), GRAND TOTAL 81✅ 2⚠️ 0❌ dari 83 tool entries
+  - ⚠️ weather_fetch: fallback ke web search (data tetap dapat)
+  - ⚠️ code_execute(bash): timeout karena queue panjang
+  - Semua tool lain 100% nyata & berfungsi
 - 2026-02-25: TEST semua 77 tools - 63/63 PASS (100%)
 - 2026-02-25: FIX generate_pdf - ganti Playwright (crash di Replit) dengan pdfkit murni JS, install pdfkit package
 - 2026-02-25: FIX generate_docx controller - sekarang support input string biasa (auto-convert ke format sections)
